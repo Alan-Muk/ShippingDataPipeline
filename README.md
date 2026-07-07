@@ -1,5 +1,13 @@
 # Weather Data Engineering Pipeline
 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python)
+![Pandas](https://img.shields.io/badge/Pandas-2.x-150458?logo=pandas)
+![Apache Airflow](https://img.shields.io/badge/Airflow-3.x-017CEE?logo=apacheairflow)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker)
+![ETL](https://img.shields.io/badge/Pipeline-ETL-success)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 A production-style data engineering pipeline that ingests, processes, and stores weather data for analytics use cases.
 
 The system demonstrates a complete **ETL workflow**, including API ingestion, raw data storage, transformation using Pandas, database loading, and orchestration using Apache Airflow.
