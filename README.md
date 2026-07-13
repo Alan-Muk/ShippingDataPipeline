@@ -8,49 +8,265 @@
 ![ETL](https://img.shields.io/badge/Pipeline-ETL-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-A production-style data engineering pipeline that ingests, processes, and stores weather data for analytics use cases.
+A production-style ETL pipeline that ingests, transforms, and stores weather data for analytics workflows.
 
-The system demonstrates a complete **ETL workflow**, including API ingestion, raw data storage, transformation using Pandas, database loading, and orchestration using Apache Airflow.
+The system demonstrates a complete data engineering lifecycle:
+
+- External API ingestion
+- Raw data storage
+- Data transformation
+- Relational database loading
+- Workflow orchestration using Apache Airflow
+
+---
+
+# Overview
+
+Weather Data Engineering Pipeline is an automated data processing system designed to collect and prepare weather information for analysis.
+
+The pipeline workflow:
+
+```text
+Weather API
+      |
+      ↓
+Data Ingestion
+      |
+      ↓
+Raw Data Storage
+      |
+      ↓
+Transformation Layer
+      |
+      ↓
+Analytics Dataset
+      |
+      ↓
+Database Storage
+      |
+      ↓
+Airflow Orchestration
+```
+
+The project follows modern ETL principles by separating extraction, transformation, and loading responsibilities into independent processing stages.
+
+---
+
+# Problem
+
+Weather APIs provide raw data that is often unsuitable for analytics without additional processing.
+
+A production-ready data workflow needs to handle:
+
+- External API communication
+- Data consistency
+- Schema normalization
+- Historical storage
+- Automated execution
+
+This project explores how raw external data can be transformed into a reliable analytics-ready dataset.
 
 ---
 
 # Architecture
 
-```text id="arch_final"
-OpenWeatherMap API
-        ↓
-Data Ingestion (Python)
-        ↓
-Raw Data Storage (JSON files - Data Lake Layer)
-        ↓
-Data Transformation (Pandas ETL)
-        ↓
-Processed Dataset (CSV / Structured Data)
-        ↓
-Database Layer (SQLite / PostgreSQL)
-        ↓
-Orchestration Layer (Apache Airflow)
+## System Architecture
+
+```text
+              OpenWeatherMap API
+
+                       |
+                       ↓
+
+              Python Ingestion Layer
+
+                       |
+                       ↓
+
+              Raw Data Lake Storage
+
+                       |
+                       ↓
+
+              Pandas Transformation
+
+                       |
+                       ↓
+
+          Structured Database Layer
+
+                       |
+                       ↓
+
+              Airflow Workflow Engine
 ```
 
 ---
 
-# Tech Stack
+# Components
 
-* **Python** – Core ETL logic and API integration
-* **Pandas** – Data transformation and cleaning
-* **Requests** – API communication
-* **SQLite / PostgreSQL** – Data storage
-* **Apache Airflow** – Workflow orchestration
-* **Docker / Podman** – Containerized environment
-* **JSON / CSV** – Data formats for raw and processed layers
+## Data Ingestion Layer
+
+Responsible for extracting weather data from external sources.
+
+Responsibilities:
+
+- Request weather information from APIs
+- Handle API communication
+- Store raw responses
+- Preserve original data for reproducibility
+
+Features:
+
+- Environment-based API configuration
+- Error handling
+- Timestamped raw files
+
+---
+
+## Raw Data Storage Layer
+
+The pipeline follows a lightweight data lake pattern.
+
+Raw API responses are stored before processing.
+
+Benefits:
+
+- Data reproducibility
+- Historical records
+- Ability to reprocess without new API calls
+
+Example:
+
+```text
+data/raw/
+
+Amsterdam_2026-06-24.json
+London_2026-06-24.json
+NewYork_2026-06-24.json
+```
+
+---
+
+## Transformation Layer
+
+Built using Pandas.
+
+Responsibilities:
+
+- Read raw JSON files
+- Extract relevant fields
+- Normalize schemas
+- Create analytics-ready datasets
+
+Extracted fields include:
+
+- City
+- Temperature
+- Humidity
+- Wind speed
+- Timestamp
+
+Output:
+
+```text
+processed_weather.csv
+```
+
+---
+
+## Database Layer
+
+Processed weather data is loaded into a relational database.
+
+Supports:
+
+- SQLite for local development
+- PostgreSQL for production-style deployments
+
+Responsibilities:
+
+- Store historical records
+- Enable SQL queries
+- Provide structured analytics access
+
+---
+
+## Workflow Orchestration
+
+Apache Airflow manages pipeline execution.
+
+Responsibilities:
+
+- Schedule ETL workflows
+- Manage task dependencies
+- Provide repeatable execution
+
+Pipeline DAG:
+
+```text
+Extract
+
+  ↓
+
+Transform
+
+  ↓
+
+Load
+```
+
+---
+
+# Core Features
+
+## Multi-City Weather Collection
+
+- Supports multiple locations
+- Extensible city configuration
+- Automated data retrieval
+
+---
+
+## ETL Pipeline Architecture
+
+Clear separation between:
+
+```text
+Extract → Transform → Load
+```
+
+Each stage can be developed, tested, and maintained independently.
+
+---
+
+## Data Lake Pattern
+
+Raw data is preserved before transformation.
+
+Advantages:
+
+- Reprocessing capability
+- Data auditing
+- Pipeline debugging
+
+---
+
+## Database Integration
+
+The pipeline provides:
+
+- Structured storage
+- Historical weather records
+- SQL querying support
 
 ---
 
 # Project Structure
 
-```bash id="structure_final"
+```text
 weather-pipeline/
-│
+
 ├── ingestion/
 │   ├── fetch_weather.py
 │   ├── transform_weather.py
@@ -62,7 +278,6 @@ weather-pipeline/
 │
 ├── data/
 │   ├── raw/
-│   ├── *.json
 │   └── processed_weather.csv
 │
 ├── config/
@@ -76,196 +291,233 @@ weather-pipeline/
 
 ---
 
-# Pipeline Overview
-
-## 1. Data Ingestion (Extract)
-
-* Fetches real-time weather data from **OpenWeatherMap API**
-* Supports multiple cities (e.g., Amsterdam, London, New York)
-* Stores raw API responses as timestamped JSON files
-
-Key Features:
-
-* Environment variable-based API key management
-* Error handling for failed requests
-* Local raw data storage (data lake pattern)
-
----
-
-## 2. Data Transformation (Transform)
-
-* Reads raw JSON files from storage
-* Extracts key weather attributes:
-
-  * city
-  * temperature
-  * humidity
-  * wind speed
-  * timestamp
-* Converts structured data into a Pandas DataFrame
-* Outputs cleaned CSV dataset
-
-Key Features:
-
-* Batch file processing using `glob`
-* Schema normalization
-* Structured analytics-ready dataset
-
----
-
-## 3. Data Loading (Load)
-
-* Loads transformed dataset into SQLite database
-* Creates structured relational table
-* Stores historical weather records
-
-Key Features:
-
-* Relational schema design
-* Persistent storage layer
-* SQL-based querying capability
-
----
-
-## 4. Workflow Orchestration (Airflow)
-
-* Automates ETL pipeline execution
-* Schedules ingestion → transformation → loading steps
-* Ensures reproducible and repeatable workflows
-
----
-
-# Features
-
-## Multi-City Weather Ingestion
-
-* Supports multiple cities
-* Extensible city configuration
-
-## Data Lake Design
-
-* Raw JSON files stored for reproducibility
-* Enables reprocessing without re-fetching API data
-
-## ETL Pipeline Architecture
-
-* Clear separation of Extract, Transform, Load stages
-* Modular Python scripts for each stage
-
-## Database Integration
-
-* SQLite for local development
-* Easily extendable to PostgreSQL
-
-## Orchestrated Workflows
-
-* Airflow DAG-based scheduling
-* Automated pipeline execution
-
----
-
 # Example Data Flow
 
-```text id="flow_final"
-Amsterdam API Response
-        ↓
+```text
+Amsterdam Weather API
+
+          ↓
+
 data/raw/Amsterdam_2026-06-24.json
-        ↓
+
+          ↓
+
 Pandas Transformation
-        ↓
+
+          ↓
+
 processed_weather.csv
-        ↓
-weather.db (SQLite table)
+
+          ↓
+
+weather.db
 ```
+
+---
+
+# Technical Highlights
+
+- Designed a complete ETL pipeline architecture
+- Implemented API-based data ingestion
+- Built reusable transformation workflows
+- Applied data lake storage principles
+- Designed relational database schemas
+- Automated workflows using Airflow
+- Containerized development environment
+
+---
+
+# Design Decisions
+
+## Raw Data Preservation
+
+Raw API responses are stored before processing.
+
+This allows:
+
+- Re-running transformations
+- Debugging incorrect outputs
+- Maintaining historical snapshots
+
+---
+
+## Modular Pipeline Stages
+
+Each pipeline stage has a single responsibility:
+
+```text
+fetch_weather.py
+
+        ↓
+
+transform_weather.py
+
+        ↓
+
+load_to_db.py
+```
+
+This improves:
+
+- Maintainability
+- Testing
+- Extensibility
+
+---
+
+## Batch Processing Model
+
+The current pipeline processes collected files in batches.
+
+This approach provides:
+
+- Simple execution model
+- Reliable processing
+- Easy recovery from failures
 
 ---
 
 # Setup Instructions
 
-## 1. Clone Repository
+## Clone Repository
 
-```bash id="setup1"
+```bash
 git clone https://github.com/your-username/weather-pipeline.git
+
 cd weather-pipeline
 ```
 
 ---
 
-## 2. Configure Environment Variables
+## Configure Environment Variables
 
-Create a `.env` file inside `config/`:
+Create:
 
-```env id="env1"
+```text
+config/.env
+```
+
+Add:
+
+```env
 OPENWEATHER_API_KEY=your_api_key_here
 ```
 
-Get API key here:
-[OpenWeatherMap API](https://openweathermap.org/api?utm_source=chatgpt.com)
-
 ---
 
-## 3. Install Dependencies
+## Install Dependencies
 
-```bash id="setup2"
+```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## 4. Run Pipeline Manually
+# Running the Pipeline
 
-### Step 1: Ingest Data
+## Extract
 
-```bash id="run1"
+```bash
 python ingestion/fetch_weather.py
 ```
 
-### Step 2: Transform Data
+---
 
-```bash id="run2"
+## Transform
+
+```bash
 python ingestion/transform_weather.py
 ```
 
-### Step 3: Load into Database
+---
 
-```bash id="run3"
+## Load
+
+```bash
 python ingestion/load_to_db.py
 ```
 
 ---
 
-## 5. Run with Airflow (Optional)
+# Running with Airflow
 
-```bash id="airflow1"
+Initialize Airflow:
+
+```bash
 airflow db init
+```
+
+Start services:
+
+```bash
 airflow webserver
+
 airflow scheduler
 ```
 
 ---
 
-# Key Engineering Concepts Demonstrated
+# Key Engineering Concepts
 
-* ETL (Extract, Transform, Load) pipeline design
-* Data lake architecture (raw JSON storage)
-* Batch processing workflows
-* API integration and external data ingestion
-* Relational database design
-* Workflow orchestration using Airflow
-* Modular and reusable Python architecture
-* Reproducible data pipelines
+This project demonstrates:
+
+- ETL pipeline design
+- Data lake architecture
+- API integration
+- Batch processing
+- Data transformation
+- Relational database design
+- Workflow orchestration
+- Modular Python engineering
+
+---
+
+# Challenges
+
+## Data Quality
+
+External APIs may return inconsistent data.
+
+Solution:
+
+- Schema normalization
+- Controlled transformations
+- Structured outputs
+
+---
+
+## Pipeline Reliability
+
+Automated workflows require predictable execution.
+
+Solution:
+
+- Airflow orchestration
+- Modular pipeline stages
+- Repeatable processing
+
+---
+
+## Data Reproducibility
+
+Processing should not depend on repeated API calls.
+
+Solution:
+
+- Raw data preservation
+- Historical snapshots
 
 ---
 
 # Future Improvements
 
-* Add real-time streaming ingestion (Kafka / Redis Streams)
-* Replace SQLite with PostgreSQL or cloud warehouse
-* Add data validation layer (Great Expectations)
-* Implement logging + monitoring (Prometheus / Grafana)
-* Deploy pipeline to cloud (AWS / GCP)
-* Add CI/CD for automated pipeline testing
-* Build dashboard (React / Streamlit) for visualization
+- Add real-time streaming ingestion with Kafka or Redis Streams
+- Replace SQLite with PostgreSQL production deployment
+- Add data validation using Great Expectations
+- Add monitoring with Prometheus and Grafana
+- Deploy pipeline to AWS/GCP
+- Add CI/CD testing workflows
+- Build analytics dashboard using React or Streamlit
 
 ---
 
