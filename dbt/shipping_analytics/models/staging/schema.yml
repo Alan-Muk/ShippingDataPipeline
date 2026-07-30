@@ -1,0 +1,70 @@
+version: 2
+
+sources:
+  - name: shipping
+    schema: main
+    tables:
+      - name: customers
+      - name: orders
+      - name: warehouses
+      - name: routes
+      - name: weather
+      - name: delivery_risk
+
+
+models:
+
+  - name: stg_customers
+    description: "Cleaned customer staging model"
+
+    columns:
+      - name: customer_id
+        description: "Unique customer identifier"
+        tests:
+          - unique
+          - not_null
+
+      - name: email
+        description: "Customer email address"
+
+      - name: first_name
+        description: "Customer first name"
+
+      - name: last_name
+        description: "Customer last name"
+
+
+  - name: stg_orders
+    description: "Cleaned order staging model"
+
+    columns:
+      - name: order_id
+        description: "Unique shipment order identifier"
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Customer identifier"
+        tests:
+          - not_null
+
+      - name: warehouse_id
+        description: "Warehouse identifier"
+        tests:
+          - not_null
+
+      - name: package_weight_kg
+        description: "Package weight in kilograms"
+
+      - name: package_size
+        description: "Package size category"
+
+      - name: priority
+        description: "Shipment priority level"
+
+      - name: status
+        description: "Current order status"
+
+      - name: created_at
+        description: "Order creation timestamp"

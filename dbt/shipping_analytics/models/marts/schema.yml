@@ -1,0 +1,108 @@
+version: 2
+
+
+models:
+
+  - name: dim_customers
+    description: "Customer dimension containing cleaned customer attributes"
+
+    columns:
+      - name: customer_id
+        description: "Unique customer identifier"
+        tests:
+          - unique
+          - not_null
+
+      - name: first_name
+        description: "Customer first name"
+
+      - name: last_name
+        description: "Customer last name"
+
+      - name: email
+        description: "Customer email address"
+
+      - name: city
+        description: "Customer city"
+
+      - name: state
+        description: "Customer state"
+
+      - name: country
+        description: "Customer country"
+
+
+
+  - name: fact_shipments
+    description: "Central shipment fact table containing order and customer shipment details"
+
+    columns:
+      - name: order_id
+        description: "Unique shipment order identifier"
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Customer identifier"
+        tests:
+          - not_null
+
+      - name: warehouse_id
+        description: "Warehouse identifier"
+        tests:
+          - not_null
+
+      - name: order_date
+        description: "Order creation timestamp"
+
+      - name: status
+        description: "Current shipment status"
+
+
+
+  - name: delivery_performance
+    description: "Dashboard-ready shipment performance model"
+
+    columns:
+      - name: order_id
+        description: "Unique shipment order identifier"
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Customer identifier"
+
+      - name: warehouse_id
+        description: "Warehouse identifier"
+
+      - name: order_date
+        description: "Order creation timestamp"
+
+      - name: status
+        description: "Current shipment status"
+
+      - name: package_weight_kg
+        description: "Package weight in kilograms"
+
+      - name: package_size
+        description: "Package size category"
+
+      - name: priority
+        description: "Shipment priority level"
+
+      - name: distance_km
+        description: "Route distance"
+
+      - name: estimated_delivery_hours
+        description: "Estimated delivery duration"
+
+      - name: temperature
+        description: "Warehouse weather temperature"
+
+      - name: risk_score
+        description: "Calculated delivery risk score"
+
+      - name: risk_category
+        description: "Risk classification"

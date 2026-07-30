@@ -1,12 +1,124 @@
+# =========================
 # Python
+# =========================
+
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 
-# Environment
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Logs
+# =========================
+
+*.log
+
+logs/
+airflow/logs/
+dbt/logs/
+
+
+# =========================
+# Data Lake
+# =========================
+
+# Raw generated data
+data/bronze/
+
+# Processed parquet data
+data/silver/
+data/gold/
+
+
+# =========================
+# DuckDB
+# =========================
+
+*.duckdb
+*.duckdb.wal
+
+# Keep warehouse folder structure
+!warehouse/.gitkeep
+
+
+# =========================
+# dbt
+# =========================
+
+dbt/*/target/
+dbt/*/dbt_packages/
+
+# dbt generated files
+target/
+manifest.json
+run_results.json
+partial_parse.msgpack
+
+
+# =========================
+# Apache Superset
+# =========================
+
+superset/home/
+superset/*.db
+
+# Superset cache
+superset/__pycache__/
+
+
+# =========================
+# Airflow
+# =========================
+
+airflow/logs/
+airflow/*.db
+
+
+# =========================
+# IDEs
+# =========================
+
+.vscode/
+.idea/
+
+*.swp
+*.swo
+
+
+# =========================
+# OS Files
+# =========================
+
+.DS_Store
+Thumbs.db
+
+
+# =========================
+# Environment Variables
+# =========================
+
 .env
+.env.*
 
+# =========================
+# Temporary files
+# =========================
 
-# Data
-data/raw/
-data/*.csv
-
+*.tmp
+*.bak
+*.cache
