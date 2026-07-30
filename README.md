@@ -1,4 +1,4 @@
-# 🚚 Shipping Analytics Data Platform
+# Shipping Analytics Data Platform
 
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python)
 ![Polars](https://img.shields.io/badge/Polars-Data%20Processing-CD792C)
