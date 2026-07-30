@@ -1,70 +1,103 @@
-# Weather Data Engineering Pipeline
+# 🚚 Shipping Analytics Data Platform
 
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python)
-![Pandas](https://img.shields.io/badge/Pandas-2.x-150458?logo=pandas)
-![Apache Airflow](https://img.shields.io/badge/Airflow-3.x-017CEE?logo=apacheairflow)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql)
-![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker)
-![ETL](https://img.shields.io/badge/Pipeline-ETL-success)
+![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python)
+![Polars](https://img.shields.io/badge/Polars-Data%20Processing-CD792C)
+![DuckDB](https://img.shields.io/badge/DuckDB-Analytics%20Warehouse-FFF000?logo=duckdb)
+![dbt](https://img.shields.io/badge/dbt-Analytics%20Engineering-FF694B?logo=dbt)
+![Streamlit](https://img.shields.io/badge/Streamlit-BI%20Dashboard-FF4B4B?logo=streamlit)
+![Airflow](https://img.shields.io/badge/Airflow-Orchestration-017CEE?logo=apacheairflow)
+![Podman](https://img.shields.io/badge/Podman-Containerized-892CA0?logo=podman)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-A production-style ETL pipeline that ingests, transforms, and stores weather data for analytics workflows.
+An end-to-end data engineering and analytics platform that simulates a modern logistics operation.
 
-The system demonstrates a complete data engineering lifecycle:
+The platform ingests customer, warehouse, order, route, and weather data, processes it through a medallion architecture, models analytics datasets using dbt, stores analytical data in DuckDB, and provides interactive business intelligence dashboards through Streamlit.
 
-- External API ingestion
-- Raw data storage
-- Data transformation
-- Relational database loading
-- Workflow orchestration using Apache Airflow
+The project demonstrates a production-style analytics stack:
+
+- Python ETL pipeline
+- Polars data processing
+- Parquet data lake
+- DuckDB analytical warehouse
+- dbt transformations
+- Data quality testing
+- Streamlit BI dashboards
+- Apache Superset compatibility
+- Containerised services using Podman
+- Analytics engineering practices
 
 ---
 
 # Overview
 
-Weather Data Engineering Pipeline is an automated data processing system designed to collect and prepare weather information for analysis.
+Shipping Analytics Data Platform is an automated data processing and analytics system designed to transform raw logistics data into business intelligence insights.
 
 The pipeline workflow:
 
 ```text
-Weather API
-      |
-      ↓
-Data Ingestion
-      |
-      ↓
-Raw Data Storage
-      |
-      ↓
-Transformation Layer
-      |
-      ↓
-Analytics Dataset
-      |
-      ↓
-Database Storage
-      |
-      ↓
-Airflow Orchestration
+External Data Sources
+
+          |
+          ↓
+
+Python Extraction Layer
+
+          |
+          ↓
+
+Bronze Layer
+Raw JSON Data
+
+          |
+          ↓
+
+Silver Layer
+Clean Parquet Data
+
+          |
+          ↓
+
+DuckDB Analytics Warehouse
+
+          |
+          ↓
+
+dbt Transformation Layer
+
+          |
+          ↓
+
+Analytics Marts
+
+          |
+          ↓
+
+Streamlit Dashboard
+
+          |
+          ↓
+
+Business Intelligence Insights
 ```
 
-The project follows modern ETL principles by separating extraction, transformation, and loading responsibilities into independent processing stages.
+The project follows modern data engineering principles by separating ingestion, transformation, modelling, and analytics responsibilities.
 
 ---
 
 # Problem
 
-Weather APIs provide raw data that is often unsuitable for analytics without additional processing.
+Logistics operations generate large amounts of operational data that require processing before meaningful analytics can be performed.
 
-A production-ready data workflow needs to handle:
+A production analytics workflow needs to handle:
 
-- External API communication
-- Data consistency
-- Schema normalization
-- Historical storage
+- Multiple external data sources
+- Data quality management
+- Historical data preservation
+- Analytical modelling
+- Business reporting
 - Automated execution
 
-This project explores how raw external data can be transformed into a reliable analytics-ready dataset.
+This project explores how raw logistics data can be transformed into reliable analytics datasets.
 
 ---
 
@@ -73,32 +106,44 @@ This project explores how raw external data can be transformed into a reliable a
 ## System Architecture
 
 ```text
-              OpenWeatherMap API
+              External Data Sources
 
                        |
                        ↓
 
-              Python Ingestion Layer
+              Python Extraction Layer
 
                        |
                        ↓
 
-              Raw Data Lake Storage
+                 Bronze Layer
+                 Raw JSON Files
 
                        |
                        ↓
 
-              Pandas Transformation
+                 Silver Layer
+              Clean Parquet Data
 
                        |
                        ↓
 
-          Structured Database Layer
+              DuckDB Warehouse
 
                        |
                        ↓
 
-              Airflow Workflow Engine
+                 dbt Models
+
+                       |
+                       ↓
+
+              Analytics Marts
+
+                       |
+                       ↓
+
+          Streamlit Analytics Platform
 ```
 
 ---
@@ -107,417 +152,623 @@ This project explores how raw external data can be transformed into a reliable a
 
 ## Data Ingestion Layer
 
-Responsible for extracting weather data from external sources.
+Responsible for extracting operational data from source systems.
 
 Responsibilities:
 
-- Request weather information from APIs
-- Handle API communication
-- Store raw responses
-- Preserve original data for reproducibility
+- Collect customer information
+- Generate warehouse data
+- Retrieve weather observations
+- Create shipment records
+- Preserve raw ingestion files
 
 Features:
 
-- Environment-based API configuration
-- Error handling
-- Timestamped raw files
+- Timestamped ingestion files
+- Reproducible processing
+- Historical data preservation
 
 ---
 
-## Raw Data Storage Layer
+## Bronze Data Lake Layer
 
-The pipeline follows a lightweight data lake pattern.
-
-Raw API responses are stored before processing.
-
-Benefits:
-
-- Data reproducibility
-- Historical records
-- Ability to reprocess without new API calls
+The bronze layer stores raw source data before transformation.
 
 Example:
 
 ```text
-data/raw/
+data/bronze/
 
-Amsterdam_2026-06-24.json
-London_2026-06-24.json
-NewYork_2026-06-24.json
+├── customers/
+
+│   └── customers_20260729_094104.json
+
+└── weather/
 ```
+
+Benefits:
+
+- Preserve original data
+- Enable pipeline replay
+- Support debugging
+- Maintain ingestion history
 
 ---
 
-## Transformation Layer
+## Silver Transformation Layer
 
-Built using Pandas.
+The silver layer contains cleaned and structured Parquet datasets.
+
+Example:
+
+```text
+data/silver/customers/customers.parquet
+```
+
+Datasets:
+
+| Dataset | Description |
+|---|---|
+| customers | Clean customer records |
+| orders | Shipment order information |
+| warehouses | Warehouse locations |
+| weather | Weather observations |
 
 Responsibilities:
 
-- Read raw JSON files
-- Extract relevant fields
-- Normalize schemas
-- Create analytics-ready datasets
+- Schema standardisation
+- Data cleaning
+- Type conversion
+- Analytics preparation
 
-Extracted fields include:
+---
 
-- City
-- Temperature
-- Humidity
-- Wind speed
-- Timestamp
+## Gold Analytics Layer
 
-Output:
+The gold layer contains business-ready datasets.
+
+Examples:
 
 ```text
-processed_weather.csv
+data/gold/routes/routes.parquet
+
+data/gold/delivery_risk/delivery_risk.parquet
+```
+
+Contains:
+
+- Route calculations
+- Transport information
+- Estimated delivery times
+- Delivery risk scoring
+- Weather impact analysis
+
+---
+
+## Database Warehouse Layer
+
+DuckDB provides analytical warehouse capabilities.
+
+Warehouse location:
+
+```text
+warehouse/shipping.duckdb
+```
+
+Analytical tables:
+
+```text
+customers
+
+orders
+
+warehouses
+
+weather
+
+routes
+
+delivery_risk
+
+stg_customers
+
+stg_orders
+
+dim_customers
+
+fact_shipments
+
+delivery_performance
 ```
 
 ---
 
-## Database Layer
+## dbt Analytics Layer
 
-Processed weather data is loaded into a relational database.
+dbt transforms warehouse data into analytics-ready models.
 
-Supports:
-
-- SQLite for local development
-- PostgreSQL for production-style deployments
-
-Responsibilities:
-
-- Store historical records
-- Enable SQL queries
-- Provide structured analytics access
-
----
-
-## Workflow Orchestration
-
-Apache Airflow manages pipeline execution.
-
-Responsibilities:
-
-- Schedule ETL workflows
-- Manage task dependencies
-- Provide repeatable execution
-
-Pipeline DAG:
+Location:
 
 ```text
-Extract
-
-  ↓
-
-Transform
-
-  ↓
-
-Load
+dbt/shipping_analytics/
 ```
 
 ---
 
-# Core Features
+# dbt Models
 
-## Multi-City Weather Collection
+## Staging Models
 
-- Supports multiple locations
-- Extensible city configuration
-- Automated data retrieval
-
----
-
-## ETL Pipeline Architecture
-
-Clear separation between:
+Location:
 
 ```text
-Extract → Transform → Load
+models/staging/
 ```
 
-Each stage can be developed, tested, and maintained independently.
+Models:
+
+- stg_customers
+- stg_orders
+
+Purpose:
+
+- Standardise schemas
+- Clean source data
+- Prepare downstream models
 
 ---
 
-## Data Lake Pattern
+## Analytics Models
 
-Raw data is preserved before transformation.
+Location:
 
-Advantages:
-
-- Reprocessing capability
-- Data auditing
-- Pipeline debugging
+```text
+models/marts/
+```
 
 ---
 
-## Database Integration
+## dim_customers
 
-The pipeline provides:
+Customer dimension model.
 
-- Structured storage
-- Historical weather records
-- SQL querying support
+Columns:
+
+```text
+customer_id
+first_name
+last_name
+email
+city
+state
+country
+```
+
+---
+
+## fact_shipments
+
+Shipment fact model.
+
+Columns:
+
+```text
+order_id
+customer_id
+warehouse_id
+order_date
+package_weight_kg
+package_size
+priority
+status
+customer_city
+customer_country
+```
+
+---
+
+## delivery_performance
+
+Final analytics model combining shipment, route, weather, and risk data.
+
+Columns:
+
+```text
+order_id
+customer_id
+warehouse_id
+order_date
+status
+package_weight_kg
+package_size
+priority
+distance_km
+estimated_delivery_hours
+temperature
+wind_speed
+risk_score
+risk_category
+```
+
+---
+
+# Streamlit Analytics Platform
+
+The dashboard provides interactive logistics intelligence.
+
+Run:
+
+```bash
+streamlit run dashboard/app.py
+```
+
+---
+
+# Dashboard Features
+
+## Executive Overview
+
+Operational KPIs:
+
+- Total shipments
+- Customers
+- Warehouses
+- Average distance
+- Delivery time
+- Shipment trends
+- Priority distribution
+- Risk overview
+
+---
+
+## Route Analytics
+
+Provides logistics efficiency analysis:
+
+- Transport performance
+- Route distances
+- Delivery estimates
+- Speed calculations
+- Longest routes
+- Warehouse route volume
+
+---
+
+## Delivery Risk Analytics
+
+Identifies operational risks:
+
+- Risk categories
+- Risk score distribution
+- Weather impact
+- Temperature analysis
+- Wind influence
+- Highest-risk shipments
+
+Risk scoring considers:
+
+- Route distance
+- Weather conditions
+
+---
+
+## Warehouse Analytics
+
+Provides warehouse intelligence:
+
+- Shipment volume
+- Capacity comparison
+- Warehouse performance
+- Delivery efficiency
+- Risk by warehouse
+- Geographic locations
+
+---
+
+## Customer Analytics
+
+Explores customer behaviour:
+
+- Shipment frequency
+- Customer distribution
+- Country activity
+- Package preferences
+- Top customers
+
+---
+
+# Global Dashboard Filters
+
+All dashboard pages share a common filtering system.
+
+Available filters:
+
+- Warehouse
+- Shipment status
+- Priority
+- Risk category
+
+Filters persist using Streamlit session state.
 
 ---
 
 # Project Structure
 
 ```text
-weather-pipeline/
+ShippingDataPipeline/
 
-├── ingestion/
-│   ├── fetch_weather.py
-│   ├── transform_weather.py
-│   └── load_to_db.py
-│
 ├── airflow/
-│   └── dags/
-│       └── weather_pipeline.py
+│   ├── dags/
+│   └── logs/
+│
+├── dashboard/
+│   ├── app.py
+│   ├── database.py
+│   ├── queries.py
+│   │
+│   ├── pages/
+│   │   ├── Overview.py
+│   │   ├── Customers.py
+│   │   ├── Routes.py
+│   │   ├── Risk.py
+│   │   └── Warehouses.py
+│   │
+│   └── components/
+│       ├── sidebar.py
+│       ├── filters.py
+│       ├── cards.py
+│       └── header.py
 │
 ├── data/
-│   ├── raw/
-│   └── processed_weather.csv
+│   ├── bronze/
+│   ├── silver/
+│   └── gold/
 │
-├── config/
-│   └── .env
+├── dbt/
+│   └── shipping_analytics/
+│       ├── models/
+│       │   ├── staging/
+│       │   └── marts/
+│       └── dev.duckdb
 │
-├── weather.db
-├── docker-compose.yml
-├── requirements.txt
+├── src/
+│   ├── extract/
+│   ├── transform/
+│   ├── warehouse/
+│   ├── models/
+│   ├── utils/
+│   └── pipeline.py
+│
+├── tests/
+│
+├── warehouse/
+│   └── shipping.duckdb
+│
 └── README.md
-```
-
----
-
-# Example Data Flow
-
-```text
-Amsterdam Weather API
-
-          ↓
-
-data/raw/Amsterdam_2026-06-24.json
-
-          ↓
-
-Pandas Transformation
-
-          ↓
-
-processed_weather.csv
-
-          ↓
-
-weather.db
-```
-
----
-
-# Technical Highlights
-
-- Designed a complete ETL pipeline architecture
-- Implemented API-based data ingestion
-- Built reusable transformation workflows
-- Applied data lake storage principles
-- Designed relational database schemas
-- Automated workflows using Airflow
-- Containerized development environment
-
----
-
-# Design Decisions
-
-## Raw Data Preservation
-
-Raw API responses are stored before processing.
-
-This allows:
-
-- Re-running transformations
-- Debugging incorrect outputs
-- Maintaining historical snapshots
-
----
-
-## Modular Pipeline Stages
-
-Each pipeline stage has a single responsibility:
-
-```text
-fetch_weather.py
-
-        ↓
-
-transform_weather.py
-
-        ↓
-
-load_to_db.py
-```
-
-This improves:
-
-- Maintainability
-- Testing
-- Extensibility
-
----
-
-## Batch Processing Model
-
-The current pipeline processes collected files in batches.
-
-This approach provides:
-
-- Simple execution model
-- Reliable processing
-- Easy recovery from failures
-
----
-
-# Setup Instructions
-
-## Clone Repository
-
-```bash
-git clone https://github.com/your-username/weather-pipeline.git
-
-cd weather-pipeline
-```
-
----
-
-## Configure Environment Variables
-
-Create:
-
-```text
-config/.env
-```
-
-Add:
-
-```env
-OPENWEATHER_API_KEY=your_api_key_here
-```
-
----
-
-## Install Dependencies
-
-```bash
-pip install -r requirements.txt
 ```
 
 ---
 
 # Running the Pipeline
 
-## Extract
+From the project root:
 
 ```bash
-python ingestion/fetch_weather.py
+python -m src.pipeline
+```
+
+Generates:
+
+- Bronze JSON files
+- Silver Parquet files
+- Gold analytical datasets
+- DuckDB warehouse tables
+- Dashboard-ready models
+
+---
+
+# Running dbt
+
+Navigate:
+
+```bash
+cd dbt/shipping_analytics
+```
+
+Run models:
+
+```bash
+dbt run
+```
+
+Run tests:
+
+```bash
+dbt test
 ```
 
 ---
 
-## Transform
+# Testing
+
+Testing is performed using:
+
+- pytest
+- dbt tests
+
+Run Python tests:
 
 ```bash
-python ingestion/transform_weather.py
+pytest
+```
+
+Current validation:
+
+```text
+customers              100 rows
+
+dim_customers          100 rows
+
+orders                 300 rows
+
+fact_shipments         300 rows
+
+delivery_performance   300 rows
 ```
 
 ---
 
-## Load
+# Technical Highlights
 
-```bash
-python ingestion/load_to_db.py
+- Designed a complete medallion architecture
+- Built automated ETL workflows
+- Implemented Parquet-based data lake storage
+- Created DuckDB analytics warehouse
+- Developed dbt dimensional models
+- Added data quality testing
+- Built interactive Streamlit dashboards
+- Implemented global dashboard filtering
+- Containerised services with Podman
+
+---
+
+# Design Decisions
+
+## Medallion Architecture
+
+The pipeline separates data into:
+
+```text
+Bronze → Silver → Gold
+```
+
+Benefits:
+
+- Improved data quality
+- Reproducible processing
+- Clear data ownership
+- Easier debugging
+
+---
+
+## Analytics Engineering Approach
+
+dbt is used to:
+
+- Transform warehouse tables
+- Create reusable models
+- Document analytics logic
+- Validate datasets
+
+---
+
+## Analytical Warehouse Design
+
+DuckDB was selected because it provides:
+
+- Fast analytical queries
+- Local warehouse capabilities
+- SQL compatibility
+- Lightweight deployment
+
+---
+
+# Analytics Capabilities
+
+The platform can answer questions such as:
+
+## Operations
+
+- Which warehouses process the most shipments?
+- Which routes are the longest?
+- Which transport modes are most efficient?
+
+## Risk Management
+
+- Which shipments have the highest risk?
+- How does weather affect delivery?
+- Which warehouses have increased operational risk?
+
+## Customer Intelligence
+
+- Which countries generate the most shipments?
+- Which customers are most active?
+- What package types are most common?
+
+---
+
+# Containerisation
+
+Services can be deployed using Podman.
+
+Architecture:
+
+```text
+Fedora Silverblue Host
+
+          |
+
+        Podman
+
+          |
+
+ Analytics Services
+
+          |
+
+ DuckDB Warehouse
 ```
 
 ---
 
-# Running with Airflow
+# Technology Stack
 
-Initialize Airflow:
-
-```bash
-airflow db init
-```
-
-Start services:
-
-```bash
-airflow webserver
-
-airflow scheduler
-```
-
----
-
-# Key Engineering Concepts
-
-This project demonstrates:
-
-- ETL pipeline design
-- Data lake architecture
-- API integration
-- Batch processing
-- Data transformation
-- Relational database design
-- Workflow orchestration
-- Modular Python engineering
-
----
-
-# Challenges
-
-## Data Quality
-
-External APIs may return inconsistent data.
-
-Solution:
-
-- Schema normalization
-- Controlled transformations
-- Structured outputs
-
----
-
-## Pipeline Reliability
-
-Automated workflows require predictable execution.
-
-Solution:
-
-- Airflow orchestration
-- Modular pipeline stages
-- Repeatable processing
-
----
-
-## Data Reproducibility
-
-Processing should not depend on repeated API calls.
-
-Solution:
-
-- Raw data preservation
-- Historical snapshots
+| Component | Technology |
+|---|---|
+| Language | Python |
+| Data Processing | Polars |
+| Storage Format | Parquet |
+| Warehouse | DuckDB |
+| Transformation | dbt |
+| Testing | pytest + dbt tests |
+| Orchestration | Airflow |
+| Dashboard | Streamlit |
+| BI Compatibility | Apache Superset |
+| Containers | Podman |
+| Operating System | Fedora Silverblue |
 
 ---
 
 # Future Improvements
 
-- Add real-time streaming ingestion with Kafka or Redis Streams
-- Replace SQLite with PostgreSQL production deployment
-- Add data validation using Great Expectations
-- Add monitoring with Prometheus and Grafana
-- Deploy pipeline to AWS/GCP
-- Add CI/CD testing workflows
-- Build analytics dashboard using React or Streamlit
+Planned enhancements:
+
+- Airflow DAG scheduling
+- Automated dbt execution
+- CI/CD pipeline
+- Data quality monitoring
+- Real-time shipment events
+- Predictive delivery delay models
+- Machine learning risk prediction
+- Cloud deployment
+- Dashboard hosting
+
+---
+
+# Project Status
+
+Current implementation:
+
+ Data extraction  
+ Bronze/Silver/Gold architecture  
+ Parquet data lake  
+ DuckDB warehouse  
+ dbt staging models  
+ dbt analytics marts  
+ Automated tests  
+ Delivery risk modelling  
+ Streamlit dashboard application  
+ Global dashboard filtering system  
 
 ---
 
