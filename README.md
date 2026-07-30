@@ -772,6 +772,15 @@ Current implementation:
 
 ---
 
+<img width="896" height="450" alt="newplot (6)" src="https://github.com/user-attachments/assets/cfff00db-a190-4021-a09b-7f2f1ccf1d81" />
+<img width="440" height="450" alt="newplot (5)" src="https://github.com/user-attachments/assets/6f1a3e6d-abe6-491e-a7e1-ef039c1b4346" />
+<img width="440" height="450" alt="newplot (4)" src="https://github.com/user-attachments/assets/efb248df-d979-475b-b680-fc77c51f8e1e" />
+<img width="896" height="450" alt="newplot (3)" src="https://github.com/user-attachments/assets/3f8f70fa-1fc9-4814-b106-a2c11b8ae874" />
+<img width="440" height="450" alt="newplot (2)" src="https://github.com/user-attachments/assets/6be326ca-0d71-4d35-8251-a39ddfffc272" />
+<img width="896" height="600" alt="newplot (1)" src="https://github.com/user-attachments/assets/8d67b14a-e519-4a19-a712-b9877f669dbd" />
+<img width="440" height="450" alt="newplot" src="https://github.com/user-attachments/assets/3cba59e9-0546-4acf-9cef-487b6ad8188d" />
+
+
 # License
 
 MIT License
