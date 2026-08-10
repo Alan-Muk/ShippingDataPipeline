@@ -58,3 +58,31 @@ class CustomerExtractor:
         logger.info(f"Saved raw customers: {output_file}")
 
         return output_file
+
+"""
+CustomerExtractor
+
+This class extracts customer data from the RandomUser API
+and saves the raw response to the Bronze data layer.
+
+Responsibilities:
+
+* Fetch customer records from the RandomUser API.
+* Handle API request timeouts and HTTP errors.
+* Save raw API responses as timestamped JSON files.
+* Store customer data in the configured Bronze directory.
+
+Workflow:
+RandomUser API
+↓
+CustomerExtractor.fetch()
+↓
+Raw customer data
+↓
+CustomerExtractor.save_raw()
+↓
+Bronze layer (JSON)
+
+The extractor does not transform or clean the data; it preserves
+the raw API response for downstream processing.
+"""
