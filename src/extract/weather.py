@@ -153,3 +153,55 @@ class WeatherExtractor:
         )
 
         return output_file
+
+"""
+WeatherExtractor
+
+Extracts current weather data for each warehouse using the
+Open-Meteo API and stores the results across the Bronze and
+Silver data layers.
+
+Responsibilities:
+
+* Fetch current weather data using each warehouse's coordinates.
+* Capture temperature, wind speed, warehouse ID, and timestamp.
+* Save the raw weather records as timestamped JSON files
+  in the Bronze layer.
+* Transform the weather records into a Polars DataFrame.
+* Save the transformed weather data as a Parquet file
+  in the Silver layer.
+* Support an optional output directory when saving the
+  transformed weather data.
+
+Weather attributes:
+
+* warehouse_id
+* timestamp
+* temperature
+* wind_speed
+
+Workflow:
+Warehouse coordinates
+↓
+Open-Meteo API
+↓
+WeatherExtractor.fetch()
+↓
+Raw weather records
+↓
+WeatherExtractor.save_raw()
+↓
+Bronze layer (JSON)
+↓
+WeatherExtractor.transform()
+↓
+Weather DataFrame
+↓
+WeatherExtractor.save()
+↓
+Silver layer (weather.parquet)
+
+The extractor uses the warehouse latitude and longitude to
+retrieve current weather conditions and preserves the raw
+records before transforming them for downstream processing.
+"""
