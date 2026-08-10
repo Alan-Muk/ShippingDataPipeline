@@ -93,3 +93,43 @@ class WarehouseGenerator:
         )
 
         return output_file
+
+"""
+WarehouseGenerator
+
+Generates warehouse reference data and stores the resulting
+dataset in the Silver data layer.
+
+Responsibilities:
+
+* Define a fixed list of warehouse locations.
+* Generate unique warehouse IDs using the WH-XXX format.
+* Include warehouse details such as name, city, country,
+  coordinates, and storage capacity.
+* Return the generated warehouse data as a Polars DataFrame.
+* Save the warehouse dataset as a Parquet file in the Silver layer.
+
+Warehouse attributes:
+
+* warehouse_id
+* name
+* city
+* country
+* latitude
+* longitude
+* capacity
+
+Workflow:
+Warehouse configuration
+↓
+WarehouseGenerator.generate()
+↓
+Warehouse reference DataFrame
+↓
+WarehouseGenerator.save()
+↓
+Silver layer (warehouses.parquet)
+
+The warehouse data is static reference data intended to support
+order generation and downstream data processing.
+"""
