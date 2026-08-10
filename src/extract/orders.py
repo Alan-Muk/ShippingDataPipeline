@@ -116,3 +116,45 @@ class OrderGenerator:
         )
 
         return output_file
+
+"""
+OrderGenerator
+
+Generates synthetic shipping order data for the customer dataset
+and stores the resulting orders in the Silver data layer.
+
+Responsibilities:
+
+* Generate multiple orders for each customer.
+* Randomly assign orders to available warehouses.
+* Generate realistic order attributes such as weight, size,
+  priority, status, and creation date.
+* Assign a unique UUID to each order.
+* Return the generated data as a Polars DataFrame.
+* Save the generated orders as a Parquet file in the Silver layer.
+
+Order attributes:
+
+* order_id
+* customer_id
+* warehouse_id
+* package_weight_kg
+* package_size
+* priority
+* status
+* created_at
+
+Workflow:
+Customers + Warehouses
+↓
+OrderGenerator.generate()
+↓
+Synthetic order DataFrame
+↓
+OrderGenerator.save()
+↓
+Silver layer (orders.parquet)
+
+The generated data is synthetic and intended for testing,
+development, and downstream data pipeline processing.
+"""
