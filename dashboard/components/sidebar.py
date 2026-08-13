@@ -2,11 +2,7 @@ import streamlit as st
 
 
 def render_sidebar():
-
-    st.sidebar.title(
-        "🚚 Shipping Analytics"
-    )
-
+    st.sidebar.title("🚚 Shipping Analytics")
 
     st.sidebar.markdown(
         """

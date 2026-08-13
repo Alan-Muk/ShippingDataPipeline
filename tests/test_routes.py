@@ -4,7 +4,6 @@ from src.transform.routes import RouteTransformer
 
 
 def test_haversine():
-
     transformer = RouteTransformer()
 
     distance = transformer.haversine(
@@ -19,7 +18,6 @@ def test_haversine():
 
 
 def test_route_generation():
-
     transformer = RouteTransformer()
 
     orders = pl.DataFrame(

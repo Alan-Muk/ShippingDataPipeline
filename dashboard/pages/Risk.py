@@ -1,10 +1,7 @@
 import streamlit as st
 import plotly.express as px
 
-from queries import (
-    run_query,
-    risk_summary
-)
+from queries import run_query, risk_summary
 
 from components.sidebar import render_sidebar
 from components.filters import render_filters
@@ -20,39 +17,19 @@ render_filters()
 # -------------------------
 
 filters = {
-
-    "warehouses":
-        st.session_state.get(
-            "warehouse_filter",
-            []
-        ),
-
-    "statuses":
-        st.session_state.get(
-            "status_filter",
-            []
-        ),
-
-    "priorities":
-        st.session_state.get(
-            "priority_filter",
-            []
-        ),
-
-    "risk":
-        st.session_state.get(
-            "risk_filter",
-            []
-        )
+    "warehouses": st.session_state.get("warehouse_filter", []),
+    "statuses": st.session_state.get("status_filter", []),
+    "priorities": st.session_state.get("priority_filter", []),
+    "risk": st.session_state.get("risk_filter", []),
 }
-
 
 
 # -------------------------
 # KPI SECTION
 # -------------------------
 
-metrics = run_query("""
+metrics = run_query(
+    """
 SELECT
 
     COUNT(*) AS shipments,
@@ -65,37 +42,23 @@ SELECT
 
 FROM delivery_performance
 
-""").iloc[0]
-
+"""
+).iloc[0]
 
 
 a, b, c, d = st.columns(4)
 
 
-a.metric(
-    "Shipments Analysed",
-    f"{int(metrics.shipments):,}"
-)
+a.metric("Shipments Analysed", f"{int(metrics.shipments):,}")
 
-b.metric(
-    "Average Risk Score",
-    f"{metrics.avg_risk:.1f}"
-)
+b.metric("Average Risk Score", f"{metrics.avg_risk:.1f}")
 
-c.metric(
-    "Highest Risk Score",
-    f"{int(metrics.max_risk)}"
-)
+c.metric("Highest Risk Score", f"{int(metrics.max_risk)}")
 
-d.metric(
-    "Average Temperature",
-    f"{metrics.avg_temperature:.1f} °C"
-)
-
+d.metric("Average Temperature", f"{metrics.avg_temperature:.1f} °C")
 
 
 st.divider()
-
 
 
 # -------------------------
@@ -103,7 +66,6 @@ st.divider()
 # -------------------------
 
 left, right = st.columns(2)
-
 
 
 risk = risk_summary(filters)
@@ -114,57 +76,43 @@ fig = px.pie(
     names="risk_category",
     values="shipments",
     title="Risk Category Distribution",
-    color="risk_category"
+    color="risk_category",
 )
 
 
-left.plotly_chart(
-    fig,
-    use_container_width=True
-)
+left.plotly_chart(fig, use_container_width=True)
 
 
-
-scores = run_query("""
+scores = run_query(
+    """
 SELECT
 
     risk_score
 
 FROM delivery_performance
 
-""")
-
-
-fig = px.histogram(
-    scores,
-    x="risk_score",
-    nbins=20,
-    title="Risk Score Distribution"
+"""
 )
 
 
-right.plotly_chart(
-    fig,
-    use_container_width=True
-)
+fig = px.histogram(scores, x="risk_score", nbins=20, title="Risk Score Distribution")
 
+
+right.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
 # RISK BY WAREHOUSE
 # -------------------------
 
-st.subheader(
-    "🏭 Risk by Warehouse"
-)
+st.subheader("🏭 Risk by Warehouse")
 
 
-
-warehouse_risk = run_query("""
+warehouse_risk = run_query(
+    """
 SELECT
 
     w.name,
@@ -183,7 +131,8 @@ GROUP BY w.name
 
 ORDER BY avg_risk DESC
 
-""")
+"""
+)
 
 
 fig = px.bar(
@@ -191,39 +140,28 @@ fig = px.bar(
     x="name",
     y="avg_risk",
     color="avg_risk",
-    title="Average Risk Score by Warehouse"
+    title="Average Risk Score by Warehouse",
 )
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)
 
 
-
-st.dataframe(
-    warehouse_risk,
-    use_container_width=True
-)
-
+st.dataframe(warehouse_risk, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
 # WEATHER IMPACT
 # -------------------------
 
-st.subheader(
-    "🌦 Weather Impact"
-)
+st.subheader("🌦 Weather Impact")
 
 
-
-weather = run_query("""
+weather = run_query(
+    """
 SELECT
 
     temperature,
@@ -234,7 +172,8 @@ SELECT
 
 FROM delivery_performance
 
-""")
+"""
+)
 
 
 fig = px.scatter(
@@ -243,33 +182,25 @@ fig = px.scatter(
     y="risk_score",
     size="wind_speed",
     color="risk_score",
-    title="Temperature vs Risk Score"
+    title="Temperature vs Risk Score",
 )
 
 
-
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
-
+st.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
 # HIGH RISK SHIPMENTS
 # -------------------------
 
-st.subheader(
-    "🚨 Highest Risk Shipments"
-)
+st.subheader("🚨 Highest Risk Shipments")
 
 
-
-high_risk = run_query("""
+high_risk = run_query(
+    """
 SELECT
 
     order_id,
@@ -294,10 +225,8 @@ ORDER BY risk_score DESC
 
 LIMIT 50
 
-""")
-
-
-st.dataframe(
-    high_risk,
-    use_container_width=True
+"""
 )
+
+
+st.dataframe(high_risk, use_container_width=True)

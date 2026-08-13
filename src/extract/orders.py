@@ -48,20 +48,12 @@ class OrderGenerator:
 
         warehouse_list = warehouses_df.to_dicts()
         for customer in customers_df.iter_rows(named=True):
-            warehouse = random.choice(
-                warehouse_list
-            )
+            warehouse = random.choice(warehouse_list)
 
             for _ in range(orders_per_customer):
+                created_date = datetime.now() - timedelta(days=random.randint(0, 90))
 
-                created_date = (
-                    datetime.now()
-                    - timedelta(days=random.randint(0, 90))
-                )
-
-                warehouse = random.choice(
-                    warehouse_list
-                )
+                warehouse = random.choice(warehouse_list)
 
                 orders.append(
                     {
@@ -72,28 +64,18 @@ class OrderGenerator:
                             random.uniform(0.5, 25),
                             2,
                         ),
-                        "package_size": random.choice(
-                            self.PACKAGE_SIZES
-                        ),
-                        "priority": random.choice(
-                            self.PRIORITIES
-                        ),
-                        "status": random.choice(
-                            self.STATUSES
-                        ),
+                        "package_size": random.choice(self.PACKAGE_SIZES),
+                        "priority": random.choice(self.PRIORITIES),
+                        "status": random.choice(self.STATUSES),
                         "created_at": created_date,
                     }
                 )
-                
 
         df = pl.DataFrame(orders)
 
-        logger.info(
-            f"Generated {df.height} orders"
-        )
+        logger.info(f"Generated {df.height} orders")
 
         return df
-        
 
     def save(self, df: pl.DataFrame) -> Path:
         """
@@ -111,11 +93,10 @@ class OrderGenerator:
 
         df.write_parquet(output_file)
 
-        logger.info(
-            f"Saved orders parquet: {output_file}"
-        )
+        logger.info(f"Saved orders parquet: {output_file}")
 
         return output_file
+
 
 """
 OrderGenerator

@@ -7,8 +7,7 @@ import polars as pl
 
 
 from src.utils.logger import logger
-from src.config.settings import (OPEN_METEO_API,BRONZE_DIR,SILVER_DIR,REQUEST_TIMEOUT)
-
+from src.config.settings import OPEN_METEO_API, BRONZE_DIR, SILVER_DIR, REQUEST_TIMEOUT
 
 
 class WeatherExtractor:
@@ -21,17 +20,14 @@ class WeatherExtractor:
     def fetch(
         self,
         warehouses_df: pl.DataFrame,
-        ) -> list[dict]:
+    ) -> list[dict]:
         """
         Fetch weather for each warehouse.
         """
 
         weather_records = []
 
-        for warehouse in warehouses_df.iter_rows(
-            named=True
-        ):
-
+        for warehouse in warehouses_df.iter_rows(named=True):
             params = {
                 "latitude": warehouse["latitude"],
                 "longitude": warehouse["longitude"],
@@ -52,25 +48,19 @@ class WeatherExtractor:
                 {
                     "warehouse_id": warehouse["warehouse_id"],
                     "timestamp": datetime.now(),
-                    "temperature": data["current_weather"][
-                        "temperature"
-                    ],
-                    "wind_speed": data["current_weather"][
-                        "windspeed"
-                    ],
+                    "temperature": data["current_weather"]["temperature"],
+                    "wind_speed": data["current_weather"]["windspeed"],
                 }
             )
 
-        logger.info(
-            f"Fetched weather for {len(weather_records)} warehouses"
-        )
+        logger.info(f"Fetched weather for {len(weather_records)} warehouses")
 
         return weather_records
 
     def save_raw(
         self,
         data: list[dict],
-        ) -> Path:
+    ) -> Path:
         """
         Save raw weather response.
         """
@@ -82,12 +72,7 @@ class WeatherExtractor:
             exist_ok=True,
         )
 
-        filename = (
-            datetime.now()
-            .strftime(
-                "weather_%Y%m%d_%H%M%S.json"
-            )
-        )
+        filename = datetime.now().strftime("weather_%Y%m%d_%H%M%S.json")
 
         output_file = output_dir / filename
 
@@ -102,25 +87,21 @@ class WeatherExtractor:
                 default=str,
             )
 
-        logger.info(
-            f"Saved raw weather: {output_file}"
-        )
+        logger.info(f"Saved raw weather: {output_file}")
 
         return output_file
 
     def transform(
         self,
         data: list[dict],
-        ) -> pl.DataFrame:
+    ) -> pl.DataFrame:
         """
         Convert weather records to dataframe.
         """
 
         df = pl.DataFrame(data)
 
-        logger.info(
-            f"Transformed {df.height} weather records"
-        )
+        logger.info(f"Transformed {df.height} weather records")
 
         return df
 
@@ -128,7 +109,7 @@ class WeatherExtractor:
         self,
         df: pl.DataFrame,
         output_dir: Path | None = None,
-        ) -> Path:
+    ) -> Path:
         """
         Save weather parquet.
         """
@@ -140,19 +121,14 @@ class WeatherExtractor:
             exist_ok=True,
         )
 
-        output_file = (
-            output_dir / "weather.parquet"
-        )
+        output_file = output_dir / "weather.parquet"
 
-        df.write_parquet(
-            output_file
-        )
+        df.write_parquet(output_file)
 
-        logger.info(
-            f"Saved weather parquet: {output_file}"
-        )
+        logger.info(f"Saved weather parquet: {output_file}")
 
         return output_file
+
 
 """
 WeatherExtractor

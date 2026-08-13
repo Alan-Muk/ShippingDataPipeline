@@ -20,38 +20,32 @@ con = get_connection()
 # KPI SECTION
 # -------------------------
 
-metrics = con.sql("""
+metrics = (
+    con.sql(
+        """
 SELECT
     COUNT(DISTINCT warehouse_id) AS warehouses,
     COUNT(order_id) AS shipments,
     AVG(distance_km) AS avg_distance,
     AVG(risk_score) AS avg_risk
 FROM delivery_performance
-""").df().iloc[0]
+"""
+    )
+    .df()
+    .iloc[0]
+)
 
 
 a, b, c, d = st.columns(4)
 
 
-a.metric(
-    "Warehouses",
-    f"{int(metrics.warehouses)}"
-)
+a.metric("Warehouses", f"{int(metrics.warehouses)}")
 
-b.metric(
-    "Total Shipments",
-    f"{int(metrics.shipments):,}"
-)
+b.metric("Total Shipments", f"{int(metrics.shipments):,}")
 
-c.metric(
-    "Average Distance",
-    f"{metrics.avg_distance:,.0f} km"
-)
+c.metric("Average Distance", f"{metrics.avg_distance:,.0f} km")
 
-d.metric(
-    "Average Risk",
-    f"{metrics.avg_risk:.1f}"
-)
+d.metric("Average Risk", f"{metrics.avg_risk:.1f}")
 
 
 st.divider()
@@ -61,12 +55,11 @@ st.divider()
 # WAREHOUSE PERFORMANCE
 # -------------------------
 
-st.subheader(
-    "📦 Warehouse Performance"
-)
+st.subheader("📦 Warehouse Performance")
 
 
-warehouse = con.sql("""
+warehouse = con.sql(
+    """
 SELECT
     w.name,
     w.city,
@@ -95,13 +88,11 @@ GROUP BY
     w.capacity
 
 ORDER BY shipments DESC
-""").df()
+"""
+).df()
 
 
-st.dataframe(
-    warehouse,
-    use_container_width=True
-)
+st.dataframe(warehouse, use_container_width=True)
 
 
 st.divider()
@@ -119,14 +110,11 @@ fig = px.bar(
     x="name",
     y="shipments",
     color="shipments",
-    title="Shipment Volume by Warehouse"
+    title="Shipment Volume by Warehouse",
 )
 
 
-left.plotly_chart(
-    fig,
-    use_container_width=True
-)
+left.plotly_chart(fig, use_container_width=True)
 
 
 fig = px.bar(
@@ -134,14 +122,11 @@ fig = px.bar(
     x="name",
     y="avg_risk",
     color="avg_risk",
-    title="Average Risk by Warehouse"
+    title="Average Risk by Warehouse",
 )
 
 
-right.plotly_chart(
-    fig,
-    use_container_width=True
-)
+right.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
@@ -151,9 +136,7 @@ st.divider()
 # DELIVERY PERFORMANCE
 # -------------------------
 
-st.subheader(
-    "🚚 Delivery Performance"
-)
+st.subheader("🚚 Delivery Performance")
 
 
 fig = px.scatter(
@@ -163,14 +146,11 @@ fig = px.scatter(
     size="shipments",
     color="name",
     hover_name="name",
-    title="Distance vs Delivery Time"
+    title="Distance vs Delivery Time",
 )
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
@@ -180,19 +160,13 @@ st.divider()
 # CAPACITY VIEW
 # -------------------------
 
-st.subheader(
-    "🏗 Warehouse Capacity Context"
-)
+st.subheader("🏗 Warehouse Capacity Context")
 
 
 capacity = warehouse.copy()
 
 
-capacity["shipment_ratio"] = (
-    capacity["shipments"]
-    /
-    capacity["capacity"]
-)
+capacity["shipment_ratio"] = capacity["shipments"] / capacity["capacity"]
 
 
 fig = px.bar(
@@ -200,14 +174,11 @@ fig = px.bar(
     x="name",
     y="shipment_ratio",
     color="shipment_ratio",
-    title="Shipment Volume Compared With Capacity"
+    title="Shipment Volume Compared With Capacity",
 )
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)
 
 
 st.caption(
@@ -224,12 +195,11 @@ st.divider()
 # WAREHOUSE MAP
 # -------------------------
 
-st.subheader(
-    "🌍 Warehouse Locations"
-)
+st.subheader("🌍 Warehouse Locations")
 
 
-locations = con.sql("""
+locations = con.sql(
+    """
 SELECT
     name,
     city,
@@ -237,7 +207,8 @@ SELECT
     latitude,
     longitude
 FROM warehouses
-""").df()
+"""
+).df()
 
 
 fig = px.scatter_mapbox(
@@ -245,21 +216,13 @@ fig = px.scatter_mapbox(
     lat="latitude",
     lon="longitude",
     hover_name="name",
-    hover_data=[
-        "city",
-        "country"
-    ],
+    hover_data=["city", "country"],
     zoom=3,
-    height=500
+    height=500,
 )
 
 
-fig.update_layout(
-    mapbox_style="open-street-map"
-)
+fig.update_layout(mapbox_style="open-street-map")
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)

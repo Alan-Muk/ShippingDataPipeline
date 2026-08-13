@@ -6,7 +6,6 @@ from src.transform.delivery_risk import (
 
 
 def test_high_risk_route():
-
     transformer = DeliveryRiskTransformer()
 
     score = transformer.calculate_risk_score(
@@ -18,27 +17,16 @@ def test_high_risk_route():
 
 
 def test_risk_classification():
-
     transformer = DeliveryRiskTransformer()
 
-    assert (
-        transformer.risk_level(10)
-        == "LOW"
-    )
+    assert transformer.risk_level(10) == "LOW"
 
-    assert (
-        transformer.risk_level(40)
-        == "MEDIUM"
-    )
+    assert transformer.risk_level(40) == "MEDIUM"
 
-    assert (
-        transformer.risk_level(80)
-        == "HIGH"
-    )
+    assert transformer.risk_level(80) == "HIGH"
 
 
 def test_delivery_risk_transform():
-
     transformer = DeliveryRiskTransformer()
 
     routes = pl.DataFrame(

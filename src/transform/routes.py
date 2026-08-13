@@ -44,12 +44,7 @@ class RouteTransformer:
 
         a = (
             math.sin(delta_lat / 2) ** 2
-            +
-            math.cos(lat1)
-            *
-            math.cos(lat2)
-            *
-            math.sin(delta_lon / 2) ** 2
+            + math.cos(lat1) * math.cos(lat2) * math.sin(delta_lon / 2) ** 2
         )
 
         c = 2 * math.atan2(
@@ -64,13 +59,11 @@ class RouteTransformer:
         orders: pl.DataFrame,
         customers: pl.DataFrame,
         warehouses: pl.DataFrame,
-        ) -> pl.DataFrame:
-
+    ) -> pl.DataFrame:
         logger.info("Building routes")
 
         enriched = (
-            orders
-            .join(
+            orders.join(
                 customers.select(
                     [
                         "customer_id",
@@ -107,7 +100,6 @@ class RouteTransformer:
         routes = []
 
         for row in enriched.iter_rows(named=True):
-
             distance = self.haversine(
                 row["warehouse_latitude"],
                 row["warehouse_longitude"],
@@ -126,22 +118,17 @@ class RouteTransformer:
                         distance / 60,
                         2,
                     ),
-                    "transport_mode": random.choice(
-                        self.TRANSPORT_MODES
-                    ),
+                    "transport_mode": random.choice(self.TRANSPORT_MODES),
                 }
             )
 
         df = pl.DataFrame(routes)
 
-        logger.info(
-            f"Generated {df.height} routes"
-        )
+        logger.info(f"Generated {df.height} routes")
 
         return df
 
     def save(self, df: pl.DataFrame) -> Path:
-
         output_dir = GOLD_DIR / "routes"
 
         output_dir.mkdir(
@@ -153,8 +140,6 @@ class RouteTransformer:
 
         df.write_parquet(output_file)
 
-        logger.info(
-            f"Saved routes: {output_file}"
-        )
+        logger.info(f"Saved routes: {output_file}")
 
         return output_file

@@ -6,7 +6,6 @@ from src.warehouse.load import WarehouseLoader
 
 
 def test_database_creation():
-
     loader = WarehouseLoader()
 
     assert loader.connection is not None

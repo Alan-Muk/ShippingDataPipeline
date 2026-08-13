@@ -2,10 +2,7 @@ import streamlit as st
 import plotly.express as px
 
 from database import get_connection
-from queries import (
-    top_customers,
-    run_query
-)
+from queries import top_customers, run_query
 
 from components.sidebar import render_sidebar
 from components.filters import render_filters
@@ -25,39 +22,19 @@ con = get_connection()
 # -------------------------
 
 filters = {
-
-    "warehouses":
-        st.session_state.get(
-            "warehouse_filter",
-            []
-        ),
-
-    "statuses":
-        st.session_state.get(
-            "status_filter",
-            []
-        ),
-
-    "priorities":
-        st.session_state.get(
-            "priority_filter",
-            []
-        ),
-
-    "risk":
-        st.session_state.get(
-            "risk_filter",
-            []
-        )
+    "warehouses": st.session_state.get("warehouse_filter", []),
+    "statuses": st.session_state.get("status_filter", []),
+    "priorities": st.session_state.get("priority_filter", []),
+    "risk": st.session_state.get("risk_filter", []),
 }
-
 
 
 # -------------------------
 # KPI SECTION
 # -------------------------
 
-metrics = run_query("""
+metrics = run_query(
+    """
 SELECT
 
     COUNT(DISTINCT customer_id)
@@ -71,31 +48,21 @@ SELECT
 
 FROM fact_shipments
 
-""").iloc[0]
+"""
+).iloc[0]
 
 
 a, b, c = st.columns(3)
 
 
-a.metric(
-    "Customers",
-    f"{int(metrics.customers):,}"
-)
+a.metric("Customers", f"{int(metrics.customers):,}")
 
-b.metric(
-    "Shipments",
-    f"{int(metrics.shipments):,}"
-)
+b.metric("Shipments", f"{int(metrics.shipments):,}")
 
-c.metric(
-    "Average Package Weight",
-    f"{metrics.avg_weight:.1f} kg"
-)
-
+c.metric("Average Package Weight", f"{metrics.avg_weight:.1f} kg")
 
 
 st.divider()
-
 
 
 # -------------------------
@@ -105,7 +72,8 @@ st.divider()
 left, right = st.columns(2)
 
 
-countries = run_query("""
+countries = run_query(
+    """
 SELECT
 
     customer_country,
@@ -117,7 +85,8 @@ FROM fact_shipments
 GROUP BY customer_country
 
 ORDER BY shipments DESC
-""")
+"""
+)
 
 
 fig = px.bar(
@@ -125,15 +94,11 @@ fig = px.bar(
     x="customer_country",
     y="shipments",
     color="shipments",
-    title="Shipments by Country"
+    title="Shipments by Country",
 )
 
 
-left.plotly_chart(
-    fig,
-    use_container_width=True
-)
-
+left.plotly_chart(fig, use_container_width=True)
 
 
 # -------------------------
@@ -144,55 +109,38 @@ customers = top_customers(filters)
 
 
 fig = px.bar(
-    customers,
-    x="customer",
-    y="shipments",
-    color="shipments",
-    title="Top Customers"
+    customers, x="customer", y="shipments", color="shipments", title="Top Customers"
 )
 
 
-right.plotly_chart(
-    fig,
-    use_container_width=True
-)
-
+right.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
 # CUSTOMER TABLE
 # -------------------------
 
-st.subheader(
-    "👥 Customer Shipment Summary"
-)
+st.subheader("👥 Customer Shipment Summary")
 
 
-st.dataframe(
-    customers,
-    use_container_width=True
-)
-
+st.dataframe(customers, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
 # PACKAGE PREFERENCES
 # -------------------------
 
-st.subheader(
-    "📦 Customer Package Behaviour"
-)
+st.subheader("📦 Customer Package Behaviour")
 
 
-package = run_query("""
+package = run_query(
+    """
 SELECT
 
     package_size,
@@ -208,7 +156,8 @@ GROUP BY package_size
 
 ORDER BY shipments DESC
 
-""")
+"""
+)
 
 
 fig = px.bar(
@@ -216,31 +165,25 @@ fig = px.bar(
     x="package_size",
     y="shipments",
     color="avg_weight",
-    title="Package Size Preferences"
+    title="Package Size Preferences",
 )
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
-
+st.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
 # CUSTOMER MAP
 # -------------------------
 
-st.subheader(
-    "🗺 Customer Distribution"
-)
+st.subheader("🗺 Customer Distribution")
 
 
-customer_locations = run_query("""
+customer_locations = run_query(
+    """
 SELECT
 
     first_name,
@@ -257,7 +200,8 @@ SELECT
 
 FROM customers
 
-""")
+"""
+)
 
 
 fig = px.scatter_mapbox(
@@ -265,42 +209,30 @@ fig = px.scatter_mapbox(
     lat="latitude",
     lon="longitude",
     hover_name="first_name",
-    hover_data=[
-        "last_name",
-        "city",
-        "country"
-    ],
+    hover_data=["last_name", "city", "country"],
     zoom=1,
-    height=600
+    height=600,
 )
 
 
-fig.update_layout(
-    mapbox_style="open-street-map"
-)
+fig.update_layout(mapbox_style="open-street-map")
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
-
+st.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
 # STATUS BEHAVIOUR
 # -------------------------
 
-st.subheader(
-    "📦 Customer Order Status"
-)
+st.subheader("📦 Customer Order Status")
 
 
-status = run_query("""
+status = run_query(
+    """
 SELECT
 
     status,
@@ -313,18 +245,13 @@ GROUP BY status
 
 ORDER BY shipments DESC
 
-""")
+"""
+)
 
 
 fig = px.pie(
-    status,
-    names="status",
-    values="shipments",
-    title="Shipment Status Distribution"
+    status, names="status", values="shipments", title="Shipment Status Distribution"
 )
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)

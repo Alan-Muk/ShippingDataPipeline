@@ -23,7 +23,6 @@ def create_test_customers():
 
 
 def test_order_generation_creates_correct_amount():
-
     customers = create_test_customers()
 
     generator = OrderGenerator()
@@ -43,7 +42,6 @@ def test_order_generation_creates_correct_amount():
 
 
 def test_orders_have_required_columns():
-
     customers = create_test_customers()
 
     generator = OrderGenerator()
@@ -66,13 +64,10 @@ def test_orders_have_required_columns():
         "created_at",
     }
 
-    assert expected_columns.issubset(
-        set(orders.columns)
-    )
+    assert expected_columns.issubset(set(orders.columns))
 
 
 def test_orders_reference_existing_customers():
-
     customers = create_test_customers()
 
     generator = OrderGenerator()
@@ -85,21 +80,14 @@ def test_orders_reference_existing_customers():
         orders_per_customer=3,
     )
 
-    order_customer_ids = set(
-        orders["customer_id"]
-    )
+    order_customer_ids = set(orders["customer_id"])
 
-    customer_ids = set(
-        customers["customer_id"]
-    )
+    customer_ids = set(customers["customer_id"])
 
-    assert order_customer_ids.issubset(
-        customer_ids
-    )
+    assert order_customer_ids.issubset(customer_ids)
 
 
 def test_order_values_are_valid():
-
     customers = create_test_customers()
 
     generator = OrderGenerator()
@@ -114,26 +102,34 @@ def test_order_values_are_valid():
 
     assert orders["package_weight_kg"].min() > 0
 
-    assert orders["priority"].is_in(
-        [
-            "standard",
-            "express",
-            "priority",
-        ]
-    ).all()
+    assert (
+        orders["priority"]
+        .is_in(
+            [
+                "standard",
+                "express",
+                "priority",
+            ]
+        )
+        .all()
+    )
 
-    assert orders["status"].is_in(
-        [
-            "created",
-            "processing",
-            "shipped",
-            "delivered",
-            "cancelled",
-        ]
-    ).all()
+    assert (
+        orders["status"]
+        .is_in(
+            [
+                "created",
+                "processing",
+                "shipped",
+                "delivered",
+                "cancelled",
+            ]
+        )
+        .all()
+    )
+
 
 def create_test_warehouses():
-
     return pl.DataFrame(
         {
             "warehouse_id": [
@@ -143,8 +139,8 @@ def create_test_warehouses():
         }
     )
 
-def test_orders_reference_existing_warehouses():
 
+def test_orders_reference_existing_warehouses():
     customers = create_test_customers()
     warehouses = create_test_warehouses()
 
@@ -156,20 +152,14 @@ def test_orders_reference_existing_warehouses():
         orders_per_customer=5,
     )
 
-    order_warehouse_ids = set(
-        orders["warehouse_id"]
-    )
+    order_warehouse_ids = set(orders["warehouse_id"])
 
-    warehouse_ids = set(
-        warehouses["warehouse_id"]
-    )
+    warehouse_ids = set(warehouses["warehouse_id"])
 
-    assert order_warehouse_ids.issubset(
-        warehouse_ids
-    )
+    assert order_warehouse_ids.issubset(warehouse_ids)
+
 
 def test_orders_have_warehouse_id():
-
     customers = create_test_customers()
     warehouses = create_test_warehouses()
 

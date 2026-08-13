@@ -18,7 +18,6 @@ class CustomerTransformer:
         records = []
 
         for raw_customer in raw_data["results"]:
-
             customer = Customer(**raw_customer)
 
             records.append(
@@ -45,9 +44,7 @@ class CustomerTransformer:
 
         df = pl.DataFrame(records)
 
-        logger.info(
-            f"Transformed {df.height} customers"
-        )
+        logger.info(f"Transformed {df.height} customers")
 
         return df
 
@@ -58,17 +55,12 @@ class CustomerTransformer:
 
         output_dir = SILVER_DIR / "customers"
 
-        output_dir.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        output_dir.mkdir(parents=True, exist_ok=True)
 
         output_file = output_dir / "customers.parquet"
 
         df.write_parquet(output_file)
 
-        logger.info(
-            f"Saved customers parquet: {output_file}"
-        )
+        logger.info(f"Saved customers parquet: {output_file}")
 
         return output_file

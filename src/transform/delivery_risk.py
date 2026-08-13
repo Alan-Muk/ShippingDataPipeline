@@ -77,10 +77,7 @@ class DeliveryRiskTransformer:
         routes: pl.DataFrame,
         weather: pl.DataFrame,
     ) -> pl.DataFrame:
-
-        logger.info(
-            "Calculating delivery risk"
-        )
+        logger.info("Calculating delivery risk")
 
         enriched = routes.join(
             weather,
@@ -90,10 +87,7 @@ class DeliveryRiskTransformer:
 
         records = []
 
-        for row in enriched.iter_rows(
-            named=True
-        ):
-
+        for row in enriched.iter_rows(named=True):
             score = self.calculate_risk_score(
                 row["distance_km"],
                 row["estimated_hours"],
@@ -111,17 +105,13 @@ class DeliveryRiskTransformer:
                     "temperature": row["temperature"],
                     "wind_speed": row["wind_speed"],
                     "risk_score": score,
-                    "risk_level": self.risk_level(
-                        score
-                    ),
+                    "risk_level": self.risk_level(score),
                 }
             )
 
         df = pl.DataFrame(records)
 
-        logger.info(
-            f"Generated {df.height} risk records"
-        )
+        logger.info(f"Generated {df.height} risk records")
 
         return df
 
@@ -129,7 +119,6 @@ class DeliveryRiskTransformer:
         self,
         df: pl.DataFrame,
     ) -> Path:
-
         output_dir = GOLD_DIR / "delivery_risk"
 
         output_dir.mkdir(
@@ -137,17 +126,10 @@ class DeliveryRiskTransformer:
             exist_ok=True,
         )
 
-        output_file = (
-            output_dir /
-            "delivery_risk.parquet"
-        )
+        output_file = output_dir / "delivery_risk.parquet"
 
-        df.write_parquet(
-            output_file
-        )
+        df.write_parquet(output_file)
 
-        logger.info(
-            f"Saved delivery risk: {output_file}"
-        )
+        logger.info(f"Saved delivery risk: {output_file}")
 
         return output_file

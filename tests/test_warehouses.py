@@ -4,7 +4,6 @@ from src.extract.warehouses import WarehouseGenerator
 
 
 def test_warehouse_generation():
-
     generator = WarehouseGenerator()
 
     warehouses = generator.generate()
@@ -18,7 +17,6 @@ def test_warehouse_generation():
 
 
 def test_warehouse_schema():
-
     generator = WarehouseGenerator()
 
     warehouses = generator.generate()
@@ -33,20 +31,12 @@ def test_warehouse_schema():
         "capacity",
     }
 
-    assert expected_columns.issubset(
-        set(warehouses.columns)
-    )
+    assert expected_columns.issubset(set(warehouses.columns))
 
 
 def test_warehouse_ids_are_unique():
-
     generator = WarehouseGenerator()
 
     warehouses = generator.generate()
 
-    assert (
-        warehouses["warehouse_id"]
-        .n_unique()
-        ==
-        warehouses.height
-    )
+    assert warehouses["warehouse_id"].n_unique() == warehouses.height

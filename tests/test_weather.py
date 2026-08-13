@@ -1,21 +1,18 @@
 import polars as pl
 
 from src.extract.weather import WeatherExtractor
-from src.config.settings import (OPEN_METEO_API,BRONZE_DIR,SILVER_DIR,REQUEST_TIMEOUT)
+from src.config.settings import OPEN_METEO_API, BRONZE_DIR, SILVER_DIR, REQUEST_TIMEOUT
 
 
 def test_weather_api_configuration():
-
     assert WeatherExtractor.BASE_URL == OPEN_METEO_API
 
 
 def test_weather_timeout_configuration():
-
     assert REQUEST_TIMEOUT > 0
 
 
 def test_weather_transform():
-
     extractor = WeatherExtractor()
 
     data = [
@@ -40,7 +37,6 @@ def test_weather_transform():
 
 
 def test_weather_schema():
-
     extractor = WeatherExtractor()
 
     df = extractor.transform(
@@ -61,13 +57,10 @@ def test_weather_schema():
         "wind_speed",
     }
 
-    assert expected.issubset(
-        set(df.columns)
-    )
-    
+    assert expected.issubset(set(df.columns))
+
 
 def test_save_weather(tmp_path):
-
     extractor = WeatherExtractor()
 
     df = pl.DataFrame(

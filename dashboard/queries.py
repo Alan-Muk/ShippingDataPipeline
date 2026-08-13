@@ -5,30 +5,25 @@ from database import get_connection
 
 @st.cache_data
 def run_query(sql):
-
     con = get_connection()
 
     return con.execute(sql).df()
 
 
-
 def get_where(filters):
-
     from utils import build_where_clause
 
     if filters:
-
         return build_where_clause(filters)
 
     return ""
 
 
-
 def overview_metrics(filters=None):
-
     where = get_where(filters)
 
-    return run_query(f"""
+    return run_query(
+        f"""
     SELECT
 
         COUNT(*) AS shipments,
@@ -54,15 +49,15 @@ def overview_metrics(filters=None):
     FROM delivery_performance
 
     {where}
-    """)
-
+    """
+    )
 
 
 def shipment_status(filters=None):
-
     where = get_where(filters)
 
-    return run_query(f"""
+    return run_query(
+        f"""
     SELECT
 
         status,
@@ -76,15 +71,15 @@ def shipment_status(filters=None):
     GROUP BY status
 
     ORDER BY shipments DESC
-    """)
-
+    """
+    )
 
 
 def priority_distribution(filters=None):
-
     where = get_where(filters)
 
-    return run_query(f"""
+    return run_query(
+        f"""
     SELECT
 
         priority,
@@ -98,15 +93,15 @@ def priority_distribution(filters=None):
     GROUP BY priority
 
     ORDER BY shipments DESC
-    """)
-
+    """
+    )
 
 
 def shipment_timeline(filters=None):
-
     where = get_where(filters)
 
-    return run_query(f"""
+    return run_query(
+        f"""
     SELECT
 
         DATE(order_date) date,
@@ -120,15 +115,15 @@ def shipment_timeline(filters=None):
     GROUP BY date
 
     ORDER BY date
-    """)
-
+    """
+    )
 
 
 def risk_summary(filters=None):
-
     where = get_where(filters)
 
-    return run_query(f"""
+    return run_query(
+        f"""
     SELECT
 
         risk_category,
@@ -142,15 +137,15 @@ def risk_summary(filters=None):
     GROUP BY risk_category
 
     ORDER BY shipments DESC
-    """)
-
+    """
+    )
 
 
 def warehouse_performance(filters=None):
-
     where = get_where(filters)
 
-    return run_query(f"""
+    return run_query(
+        f"""
     SELECT
 
         w.name,
@@ -188,15 +183,15 @@ def warehouse_performance(filters=None):
         w.capacity
 
     ORDER BY shipments DESC
-    """)
-
+    """
+    )
 
 
 def route_performance(filters=None):
-
     where = get_where(filters)
 
-    return run_query(f"""
+    return run_query(
+        f"""
     SELECT
 
         transport_mode,
@@ -217,15 +212,15 @@ def route_performance(filters=None):
     GROUP BY transport_mode
 
     ORDER BY speed DESC
-    """)
-
+    """
+    )
 
 
 def top_customers(filters=None):
-
     where = get_where(filters)
 
-    return run_query(f"""
+    return run_query(
+        f"""
     SELECT
 
         c.first_name || ' ' || c.last_name
@@ -260,4 +255,5 @@ def top_customers(filters=None):
     ORDER BY shipments DESC
 
     LIMIT 20
-    """)
+    """
+    )

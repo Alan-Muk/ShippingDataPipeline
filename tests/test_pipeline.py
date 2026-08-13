@@ -4,7 +4,6 @@ from src.transform.routes import RouteTransformer
 
 
 def test_route_customer_order_relationship():
-
     orders = pl.DataFrame(
         {
             "order_id": ["ORD-001"],

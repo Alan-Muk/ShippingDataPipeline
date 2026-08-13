@@ -66,9 +66,7 @@ class WarehouseGenerator:
 
         df = pl.DataFrame(warehouses)
 
-        logger.info(
-            f"Generated {df.height} warehouses"
-        )
+        logger.info(f"Generated {df.height} warehouses")
 
         return df
 
@@ -88,11 +86,10 @@ class WarehouseGenerator:
 
         df.write_parquet(output_file)
 
-        logger.info(
-            f"Saved warehouses parquet: {output_file}"
-        )
+        logger.info(f"Saved warehouses parquet: {output_file}")
 
         return output_file
+
 
 """
 WarehouseGenerator

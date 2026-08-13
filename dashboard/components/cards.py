@@ -1,12 +1,7 @@
 import streamlit as st
 
 
-def dashboard_card(
-    title,
-    description,
-    icon
-):
-
+def dashboard_card(title, description, icon):
     st.markdown(
         f"""
         <div style="
@@ -27,5 +22,5 @@ def dashboard_card(
 
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )

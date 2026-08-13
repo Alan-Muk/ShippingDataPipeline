@@ -10,9 +10,7 @@ class WarehouseLoader:
     """
 
     def __init__(self):
-        self.connection = duckdb.connect(
-            str(DUCKDB_PATH)
-        )
+        self.connection = duckdb.connect(str(DUCKDB_PATH))
 
     def load_table(
         self,
@@ -28,9 +26,7 @@ class WarehouseLoader:
 
         self.connection.execute(query)
 
-        logger.info(
-            f"Loaded {table_name}"
-        )
+        logger.info(f"Loaded {table_name}")
 
     def close(self):
         self.connection.close()

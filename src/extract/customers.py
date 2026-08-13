@@ -4,8 +4,7 @@ import requests
 from pathlib import Path
 
 from src.utils.logger import logger
-from src.config.settings import (RANDOM_USER_API,REQUEST_TIMEOUT,BRONZE_DIR)
-
+from src.config.settings import RANDOM_USER_API, REQUEST_TIMEOUT, BRONZE_DIR
 
 
 class CustomerExtractor:
@@ -15,14 +14,9 @@ class CustomerExtractor:
     """
 
     def fetch(self, count: int):
+        logger.info(f"Fetching {count} customers")
 
-        logger.info(
-            f"Fetching {count} customers"
-        )
-
-        params = {
-            "results": count
-        }
+        params = {"results": count}
 
         response = requests.get(
             self.BASE_URL,
@@ -43,10 +37,7 @@ class CustomerExtractor:
 
         output_dir = BRONZE_DIR / "customers"
 
-        output_dir.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        output_dir.mkdir(parents=True, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -58,6 +49,7 @@ class CustomerExtractor:
         logger.info(f"Saved raw customers: {output_file}")
 
         return output_file
+
 
 """
 CustomerExtractor

@@ -13,45 +13,24 @@ render_sidebar()
 render_filters()
 
 
-
 # -------------------------
 # GLOBAL FILTERS
 # -------------------------
 
 filters = {
-
-    "warehouses":
-        st.session_state.get(
-            "warehouse_filter",
-            []
-        ),
-
-    "statuses":
-        st.session_state.get(
-            "status_filter",
-            []
-        ),
-
-    "priorities":
-        st.session_state.get(
-            "priority_filter",
-            []
-        ),
-
-    "risk":
-        st.session_state.get(
-            "risk_filter",
-            []
-        )
+    "warehouses": st.session_state.get("warehouse_filter", []),
+    "statuses": st.session_state.get("status_filter", []),
+    "priorities": st.session_state.get("priority_filter", []),
+    "risk": st.session_state.get("risk_filter", []),
 }
-
 
 
 # -------------------------
 # KPI SECTION
 # -------------------------
 
-metrics = run_query("""
+metrics = run_query(
+    """
 SELECT
 
     COUNT(*) AS routes,
@@ -65,49 +44,34 @@ SELECT
 
 FROM routes
 
-""").iloc[0]
-
+"""
+).iloc[0]
 
 
 a, b, c, d = st.columns(4)
 
 
-a.metric(
-    "Total Routes",
-    f"{int(metrics.routes):,}"
-)
+a.metric("Total Routes", f"{int(metrics.routes):,}")
 
-b.metric(
-    "Average Distance",
-    f"{metrics.avg_distance:,.0f} km"
-)
+b.metric("Average Distance", f"{metrics.avg_distance:,.0f} km")
 
-c.metric(
-    "Average Delivery Time",
-    f"{metrics.avg_hours:.1f} hrs"
-)
+c.metric("Average Delivery Time", f"{metrics.avg_hours:.1f} hrs")
 
-d.metric(
-    "Average Speed",
-    f"{metrics.avg_speed:.1f} km/hr"
-)
-
+d.metric("Average Speed", f"{metrics.avg_speed:.1f} km/hr")
 
 
 st.divider()
-
 
 
 # -------------------------
 # TRANSPORT PERFORMANCE
 # -------------------------
 
-st.subheader(
-    "🚚 Transport Performance"
-)
+st.subheader("🚚 Transport Performance")
 
 
-transport = run_query("""
+transport = run_query(
+    """
 SELECT
 
     transport_mode,
@@ -127,14 +91,11 @@ GROUP BY transport_mode
 
 ORDER BY speed DESC
 
-""")
-
-
-st.dataframe(
-    transport,
-    use_container_width=True
+"""
 )
 
+
+st.dataframe(transport, use_container_width=True)
 
 
 fig = px.bar(
@@ -142,19 +103,14 @@ fig = px.bar(
     x="transport_mode",
     y="speed",
     color="transport_mode",
-    title="Transport Efficiency (km/hr)"
+    title="Transport Efficiency (km/hr)",
 )
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
-
+st.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
@@ -164,37 +120,32 @@ st.divider()
 left, right = st.columns(2)
 
 
-
-distance = run_query("""
+distance = run_query(
+    """
 SELECT
 
     distance_km
 
 FROM routes
 
-""")
+"""
+)
 
 
 fig = px.histogram(
-    distance,
-    x="distance_km",
-    nbins=30,
-    title="Route Distance Distribution"
+    distance, x="distance_km", nbins=30, title="Route Distance Distribution"
 )
 
 
-left.plotly_chart(
-    fig,
-    use_container_width=True
-)
-
+left.plotly_chart(fig, use_container_width=True)
 
 
 # -------------------------
 # ROUTE TIME VS DISTANCE
 # -------------------------
 
-route_efficiency = run_query("""
+route_efficiency = run_query(
+    """
 SELECT
 
     distance_km,
@@ -205,7 +156,8 @@ SELECT
 
 FROM routes
 
-""")
+"""
+)
 
 
 fig = px.scatter(
@@ -213,31 +165,25 @@ fig = px.scatter(
     x="distance_km",
     y="estimated_hours",
     color="transport_mode",
-    title="Distance vs Delivery Time"
+    title="Distance vs Delivery Time",
 )
 
 
-right.plotly_chart(
-    fig,
-    use_container_width=True
-)
-
+right.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
 # LONGEST ROUTES
 # -------------------------
 
-st.subheader(
-    "🌍 Longest Routes"
-)
+st.subheader("🌍 Longest Routes")
 
 
-long_routes = run_query("""
+long_routes = run_query(
+    """
 SELECT
 
     route_id,
@@ -256,30 +202,25 @@ ORDER BY distance_km DESC
 
 LIMIT 20
 
-""")
-
-
-st.dataframe(
-    long_routes,
-    use_container_width=True
+"""
 )
 
 
+st.dataframe(long_routes, use_container_width=True)
+
 
 st.divider()
-
 
 
 # -------------------------
 # WAREHOUSE ROUTE VOLUME
 # -------------------------
 
-st.subheader(
-    "🏭 Warehouse Route Volume"
-)
+st.subheader("🏭 Warehouse Route Volume")
 
 
-warehouse = run_query("""
+warehouse = run_query(
+    """
 SELECT
 
     warehouse_id,
@@ -294,7 +235,8 @@ GROUP BY warehouse_id
 
 ORDER BY routes DESC
 
-""")
+"""
+)
 
 
 fig = px.bar(
@@ -302,31 +244,25 @@ fig = px.bar(
     x="warehouse_id",
     y="routes",
     color="warehouse_id",
-    title="Routes by Warehouse"
+    title="Routes by Warehouse",
 )
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
-
+st.plotly_chart(fig, use_container_width=True)
 
 
 st.divider()
-
 
 
 # -------------------------
 # TRANSPORT MAP VIEW
 # -------------------------
 
-st.subheader(
-    "🗺 Warehouse Network"
-)
+st.subheader("🗺 Warehouse Network")
 
 
-network = run_query("""
+network = run_query(
+    """
 SELECT
 
     w.name,
@@ -359,7 +295,8 @@ GROUP BY
 
     w.longitude
 
-""")
+"""
+)
 
 
 fig = px.scatter_mapbox(
@@ -368,22 +305,13 @@ fig = px.scatter_mapbox(
     lon="longitude",
     size="routes",
     hover_name="name",
-    hover_data=[
-        "city",
-        "country",
-        "routes"
-    ],
+    hover_data=["city", "country", "routes"],
     zoom=3,
-    height=500
+    height=500,
 )
 
 
-fig.update_layout(
-    mapbox_style="open-street-map"
-)
+fig.update_layout(mapbox_style="open-street-map")
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)
