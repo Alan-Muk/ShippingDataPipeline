@@ -122,3 +122,36 @@ Thumbs.db
 *.tmp
 *.bak
 *.cache
+
+# --- Testing ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# --- Type checking ---
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# --- Linting ---
+.ruff_cache/
+
+# --- dbt runtime ---
+dbt/**/target/
+dbt/**/logs/
+dbt/**/dbt_packages/
+
+# --- Streamlit ---
+.streamlit/secrets.toml
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+
+# --- OS ---
+.DS_Store
+Thumbs.db

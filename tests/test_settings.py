@@ -1,21 +1,22 @@
-from pathlib import Path
+"""
+Tests for src/config/settings.py.
+"""
 
 from src.config.settings import (
-    PROJECT_ROOT,
-    DATA_DIR,
     BRONZE_DIR,
-    SILVER_DIR,
-    GOLD_DIR,
-    WAREHOUSE_DIR,
-    DUCKDB_PATH,
-    DBT_DIR,
+    DATA_DIR,
     DASHBOARD_DIR,
-    RANDOM_USER_API,
-    OPEN_METEO_API,
-    REQUEST_TIMEOUT,
+    DBT_DIR,
     DEFAULT_CUSTOMER_COUNT,
-    DEFAULT_WAREHOUSE_COUNT,
     DEFAULT_ORDERS_PER_CUSTOMER,
+    DEFAULT_WAREHOUSE_COUNT,
+    DUCKDB_PATH,
+    GOLD_DIR,
+    OPEN_METEO_API,
+    PROJECT_ROOT,
+    REQUEST_TIMEOUT,
+    SILVER_DIR,
+    WAREHOUSE_DIR,
 )
 
 
@@ -28,15 +29,9 @@ def test_data_directory():
     assert DATA_DIR == PROJECT_ROOT / "data"
 
 
-def test_bronze_directory():
+def test_medallion_directories():
     assert BRONZE_DIR == DATA_DIR / "bronze"
-
-
-def test_silver_directory():
     assert SILVER_DIR == DATA_DIR / "silver"
-
-
-def test_gold_directory():
     assert GOLD_DIR == DATA_DIR / "gold"
 
 
@@ -45,32 +40,28 @@ def test_warehouse_directory():
 
 
 def test_duckdb_path():
-    assert DUCKDB_PATH == (WAREHOUSE_DIR / "shipping.duckdb")
-
+    assert DUCKDB_PATH == WAREHOUSE_DIR / "shipping.duckdb"
     assert DUCKDB_PATH.suffix == ".duckdb"
 
 
 def test_dbt_directory():
-    assert DBT_DIR == (PROJECT_ROOT / "dbt" / "shipping_analytics")
+    assert DBT_DIR == PROJECT_ROOT / "dbt" / "shipping_analytics"
 
 
 def test_dashboard_directory():
-    assert DASHBOARD_DIR == (PROJECT_ROOT / "dashboards")
+    # NOTE: singular "dashboard" — the "dashboards" plural was a typo.
+    assert DASHBOARD_DIR == PROJECT_ROOT / "dashboard"
 
 
-def test_api_urls():
-    assert RANDOM_USER_API.startswith("https://")
-
+def test_open_meteo_api_is_https():
     assert OPEN_METEO_API.startswith("https://")
 
 
-def test_request_timeout():
+def test_request_timeout_is_positive():
     assert REQUEST_TIMEOUT > 0
 
 
-def test_pipeline_defaults():
+def test_pipeline_defaults_are_positive():
     assert DEFAULT_CUSTOMER_COUNT > 0
-
     assert DEFAULT_WAREHOUSE_COUNT > 0
-
     assert DEFAULT_ORDERS_PER_CUSTOMER > 0

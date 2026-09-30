@@ -1,6 +1,5 @@
 version: 2
 
-
 models:
 
   - name: dim_customers
@@ -30,7 +29,14 @@ models:
 
       - name: country
         description: "Customer country"
+        tests:
+          - not_null
 
+      - name: latitude
+        description: "Customer latitude"
+
+      - name: longitude
+        description: "Customer longitude"
 
 
   - name: fact_shipments
@@ -47,6 +53,9 @@ models:
         description: "Customer identifier"
         tests:
           - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
 
       - name: warehouse_id
         description: "Warehouse identifier"
@@ -55,10 +64,14 @@ models:
 
       - name: order_date
         description: "Order creation timestamp"
+        tests:
+          - not_null
 
       - name: status
         description: "Current shipment status"
-
+        tests:
+          - accepted_values:
+              values: ['created', 'processing', 'shipped', 'delivered', 'cancelled']
 
 
   - name: delivery_performance
@@ -73,9 +86,13 @@ models:
 
       - name: customer_id
         description: "Customer identifier"
+        tests:
+          - not_null
 
       - name: warehouse_id
         description: "Warehouse identifier"
+        tests:
+          - not_null
 
       - name: order_date
         description: "Order creation timestamp"
@@ -92,17 +109,34 @@ models:
       - name: priority
         description: "Shipment priority level"
 
+      - name: route_id
+        description: "Unique route identifier (derived from order_id)"
+
       - name: distance_km
-        description: "Route distance"
+        description: "Route distance in kilometres (great-circle)"
 
       - name: estimated_delivery_hours
-        description: "Estimated delivery duration"
+        description: "Estimated delivery duration in hours (mode-specific)"
+
+      - name: transport_mode
+        description: "Transport mode: van (<500km), truck (500–3000km), air (>3000km)"
+        tests:
+          - accepted_values:
+              values: ['van', 'truck', 'air']
 
       - name: temperature
-        description: "Warehouse weather temperature"
+        description: "Warehouse temperature at pipeline run time (°C)"
+
+      - name: wind_speed
+        description: "Warehouse wind speed at pipeline run time (km/h)"
 
       - name: risk_score
-        description: "Calculated delivery risk score"
+        description: "Calculated delivery risk score (0–100)"
+        tests:
+          - not_null
 
       - name: risk_category
-        description: "Risk classification"
+        description: "Risk classification derived from risk_score"
+        tests:
+          - accepted_values:
+              values: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']

@@ -1,55 +1,78 @@
-import duckdb
-import streamlit as st
+"""
+Dashboard query utilities.
+
+Builds WHERE clauses from the sidebar filter dict. Filter columns
+are optionally qualified by a table alias so multi-table queries
+work without ambiguity.
+"""
+
 from pathlib import Path
 
+import duckdb
+import streamlit as st
 
-DB_PATH = Path(__file__).parent.parent / "warehouse" / "shipping.duckdb"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DB_PATH = PROJECT_ROOT / "warehouse" / "shipping.duckdb"
 
 
 @st.cache_resource
-def get_connection():
+def get_connection() -> duckdb.DuckDBPyConnection:
+    """Shared, read-only DuckDB connection to the warehouse."""
+    if not DB_PATH.exists():
+        raise FileNotFoundError(
+            f"Warehouse not found at {DB_PATH}. Run `python -m src.pipeline` first."
+        )
     return duckdb.connect(str(DB_PATH), read_only=True)
 
 
-@st.cache_data
-def query(sql):
-    con = get_connection()
-    return con.execute(sql).df()
+# ---------------------------------------------------------------------
+# WHERE-clause builder
+# ---------------------------------------------------------------------
 
 
-def build_where_clause(filters):
-    conditions = []
+def _quote(value: str) -> str:
+    """Single-quote a SQL string literal, escaping embedded quotes."""
+    return "'" + value.replace("'", "''") + "'"
 
-    if filters["warehouses"]:
-        values = ",".join([f"'{x}'" for x in filters["warehouses"]])
 
+def build_where_clause(filters: dict | None, alias: str = "") -> str:
+    """
+    Build a WHERE clause from the filter dict.
+
+    `alias` (if provided) prefixes every column reference, so the
+    clause can be dropped into a JOIN without ambiguity:
+        build_where_clause(filters, alias="d")
+        -> "WHERE d.status IN ('shipped')"
+
+    Returns "" if no filters are active.
+    """
+    if not filters:
+        return ""
+
+    prefix = f"{alias}." if alias else ""
+    conditions: list[str] = []
+
+    if filters.get("warehouses"):
+        values = ",".join(_quote(w) for w in filters["warehouses"])
         conditions.append(
-            f"""
-            warehouse_id IN
-            (
-                SELECT warehouse_id
-                FROM warehouses
-                WHERE name IN ({values})
-            )
-            """
+            f"{prefix}warehouse_id IN ("
+            f"  SELECT warehouse_id FROM warehouses WHERE name IN ({values})"
+            f")"
         )
 
-    if filters["statuses"]:
-        values = ",".join([f"'{x}'" for x in filters["statuses"]])
+    if filters.get("statuses"):
+        values = ",".join(_quote(s) for s in filters["statuses"])
+        conditions.append(f"{prefix}status IN ({values})")
 
-        conditions.append(f"status IN ({values})")
+    if filters.get("priorities"):
+        values = ",".join(_quote(p) for p in filters["priorities"])
+        conditions.append(f"{prefix}priority IN ({values})")
 
-    if filters["priorities"]:
-        values = ",".join([f"'{x}'" for x in filters["priorities"]])
+    if filters.get("risk"):
+        values = ",".join(_quote(r) for r in filters["risk"])
+        conditions.append(f"{prefix}risk_category IN ({values})")
 
-        conditions.append(f"priority IN ({values})")
-
-    if filters["risk"]:
-        values = ",".join([f"'{x}'" for x in filters["risk"]])
-
-        conditions.append(f"risk_category IN ({values})")
-
-    if len(conditions) == 0:
+    if not conditions:
         return ""
 
     return "WHERE " + " AND ".join(conditions)

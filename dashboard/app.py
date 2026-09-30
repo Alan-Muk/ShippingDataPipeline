@@ -1,198 +1,154 @@
+"""Shipping Analytics — landing page."""
+
+import sys
+from pathlib import Path
+
 import streamlit as st
 
-from queries import overview_metrics
+sys.path.insert(0, str(Path(__file__).parent))
+
+from components.cards import CARD_CSS, dashboard_card
 from components.filters import render_filters
-
-
-st.set_page_config(page_title="Shipping Analytics", page_icon="🚚", layout="wide")
-
-
-# -------------------------
-# HEADER
-# -------------------------
-
 from components.header import render_header
+from components.sidebar import render_sidebar
+from queries import overview_metrics
+
+st.set_page_config(
+    page_title="Shipping Analytics",
+    page_icon="🚚",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.markdown(CARD_CSS, unsafe_allow_html=True)
 
 render_header()
 
-
-st.markdown(
-    """
+st.markdown("""
 ### End-to-end logistics intelligence platform
 
 Explore shipment performance, delivery risk, route efficiency,
 warehouse operations, and customer behaviour through interactive
 analytics dashboards.
 
-This platform simulates a modern logistics data environment built
-using a production-style analytics stack.
-"""
-)
-
+This platform simulates a modern European logistics operation:
+**100 synthetic customers**, **4 warehouses**, **300 shipments**,
+and a **4-tier delivery risk model** — all built with a
+production-style analytics stack.
+""")
 
 st.divider()
 
-from components.sidebar import render_sidebar
-
-
 render_sidebar()
+filters = render_filters()
 
-render_filters()
-
-
-filters = {
-    "warehouses": st.session_state.get("warehouse_filter", []),
-    "statuses": st.session_state.get("status_filter", []),
-    "priorities": st.session_state.get("priority_filter", []),
-    "risk": st.session_state.get("risk_filter", []),
-}
-
-
-active_filters = sum(
-    [
-        len(filters["warehouses"]),
-        len(filters["statuses"]),
-        len(filters["priorities"]),
-        len(filters["risk"]),
-    ]
-)
-
+active_filters = sum(len(v) for v in filters.values())
 
 if active_filters:
     st.sidebar.info(f"🎯 Active filters: {active_filters}")
-
 else:
     st.sidebar.success("Showing all data")
 
-# -------------------------
-# LIVE METRICS
-# -------------------------
-
 st.subheader("📊 Platform Overview")
 
+try:
+    metrics_df = overview_metrics(filters)
+except Exception as exc:
+    st.error(f"Failed to load data: {exc}")
+    st.info("Run `python -m src.pipeline` to generate data, then refresh.")
+    st.stop()
 
-metrics = overview_metrics(filters).iloc[0]
+if metrics_df is None or len(metrics_df) == 0:
+    st.warning("No data matches the current filters.")
+    st.stop()
 
+metrics = metrics_df.iloc[0]
 
 a, b, c, d = st.columns(4)
-
-
 a.metric("Shipments", f"{int(metrics.shipments):,}")
-
 b.metric("Customers", f"{int(metrics.customers):,}")
-
 c.metric("Warehouses", f"{int(metrics.warehouses):,}")
-
 d.metric("Average Risk", f"{metrics.avg_risk:.1f}")
-
 
 st.divider()
 
-
-# -------------------------
-# WHAT YOU CAN EXPLORE
-# -------------------------
-
 st.subheader("🔎 Explore Analytics")
 
-
-from components.cards import dashboard_card
-
-
 col1, col2 = st.columns(2)
-
 
 with col1:
     dashboard_card(
         "Executive Overview",
         "Monitor shipment volume, delivery status, operational KPIs and business performance.",
         "📊",
+        href="/Overview",
     )
-
     dashboard_card(
         "Route Analytics",
         "Analyse transport modes, route distance, efficiency and delivery estimates.",
         "🚛",
+        href="/Routes",
     )
-
 
 with col2:
     dashboard_card(
         "Delivery Risk",
         "Identify risky shipments using route distance and weather conditions.",
         "⚠️",
+        href="/Risk",
     )
-
     dashboard_card(
         "Warehouse Analytics",
         "Compare warehouse performance, capacity and geographic distribution.",
         "🏭",
+        href="/Warehouses",
     )
 
 st.divider()
 
-
-# -------------------------
-# ARCHITECTURE
-# -------------------------
-
 st.subheader("🏗 Data Platform Architecture")
-
 
 st.code(
     """
-External Data Sources
-          |
-          v
-Python ETL Pipeline
-          |
-          v
-Bronze Layer
-Raw JSON Data
-          |
-          v
-Silver Layer
-Clean Parquet Data
-          |
-          v
-DuckDB Analytics Warehouse
-          |
-          v
-dbt Transformations
-          |
-          v
-Streamlit BI Dashboards
-"""
+External Data Sources (synthetic + Open-Meteo)
+              │
+              ▼
+       Python ETL Pipeline
+              │
+              ▼
+   Bronze ──► Silver ──► Gold
+   (JSON)    (Parquet)  (routes, risk)
+              │
+              ▼
+      DuckDB Warehouse
+              │
+              ▼
+    dbt (staging → marts)
+              │
+              ▼
+    Streamlit Dashboards
+""",
+    language="text",
 )
-
 
 st.divider()
 
-
-# -------------------------
-# TECHNOLOGY STACK
-# -------------------------
-
 st.subheader("⚙️ Technology Stack")
 
-
 tech = {
-    "Data Processing": "Python + Polars",
-    "Storage": "Parquet Data Lake",
+    "Language": "Python 3.14",
+    "Data Processing": "Polars",
+    "Storage": "Parquet data lake (bronze / silver / gold)",
     "Warehouse": "DuckDB",
     "Transformation": "dbt",
-    "Testing": "pytest + dbt tests",
-    "Orchestration": "Airflow",
+    "Testing": "pytest + dbt tests (17 passing)",
     "Visualisation": "Streamlit",
     "Containers": "Podman",
 }
 
-
 for key, value in tech.items():
     st.write(f"**{key}:** {value}")
 
-
 st.divider()
 
-
-st.success("Use the navigation menu on the left to explore the analytics dashboards.")
+st.caption("Use the navigation menu on the left to explore the analytics dashboards.")

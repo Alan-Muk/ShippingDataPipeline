@@ -1,6 +1,4 @@
-{{ config(
-    materialized='table'
-) }}
+{{ config(materialized='table') }}
 
 select
     customer_id,
@@ -9,6 +7,7 @@ select
     email,
     city,
     state,
-    country
-
+    country,
+    latitude,
+    longitude
 from {{ ref('stg_customers') }}

@@ -2,7 +2,88 @@
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
-[tool.pytest.ini_options]
-pythonpath = [
-    "."
+[project]
+name = "shipping-data-pipeline"
+version = "0.1.0"
+description = "End-to-end logistics analytics platform (medallion + DuckDB + dbt + Streamlit)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+dependencies = [
+    "polars>=1.0",
+    "duckdb>=1.0",
+    "pyarrow>=15.0",
+    "requests>=2.31",
+    "loguru>=0.7",
+    "streamlit>=1.30",
+    "plotly>=5.20",
+    "dbt-duckdb>=1.7",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+# ---------------------------------------------------------------------
+# pytest
+# ---------------------------------------------------------------------
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "integration: tests that run the full pipeline end-to-end",
+    "network: tests that would hit an external API (skipped by default)",
+]
+
+# ---------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*", "*/__pycache__/*", "*/models/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+
+# ---------------------------------------------------------------------
+# ruff
+# ---------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = [".git", ".venv", "dbt", "data", "warehouse", "logs", "target"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",  # line length handled by the formatter
+    "B008",  # Streamlit's pattern of calling functions in defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]  # allow imports after fixtures/patches
+
+# ---------------------------------------------------------------------
+# mypy
+# ---------------------------------------------------------------------
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true

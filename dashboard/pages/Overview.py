@@ -1,92 +1,60 @@
+"""Executive Overview page."""
+
+import sys
+from pathlib import Path
+
 import streamlit as st
 import plotly.express as px
 
-from database import get_connection
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from queries import (
+    get_where,
     overview_metrics,
+    priority_distribution,
+    risk_summary,
     run_query,
     shipment_status,
-    priority_distribution,
     shipment_timeline,
-    risk_summary,
     warehouse_performance,
 )
-
-from components.sidebar import render_sidebar
 from components.filters import render_filters
+from components.sidebar import render_sidebar
+from theme import RISK_COLORS
 
-
-st.title("📊 Shipping Analytics Overview")
+st.title("📊 Executive Overview")
 
 render_sidebar()
-render_filters()
+filters = render_filters()
 
-
-# -------------------------
-# GLOBAL FILTERS
-# -------------------------
-
-filters = {
-    "warehouses": st.session_state.get("warehouse_filter", []),
-    "statuses": st.session_state.get("status_filter", []),
-    "priorities": st.session_state.get("priority_filter", []),
-    "risk": st.session_state.get("risk_filter", []),
-}
-
-
-# -------------------------
-# KPI METRICS
-# -------------------------
 
 metrics = overview_metrics(filters).iloc[0]
 
+if int(metrics.shipments) == 0:
+    st.warning("No shipments match the current filters.")
+    st.stop()
 
 a, b, c, d = st.columns(4)
-
-
 a.metric("Shipments", f"{int(metrics.shipments):,}")
-
 b.metric("Customers", f"{int(metrics.customers):,}")
-
 c.metric("Warehouses", f"{int(metrics.warehouses):,}")
-
-d.metric("Average Risk", f"{metrics.avg_risk:.1f}")
-
+d.metric("High-Risk", f"{int(metrics.high_risk_shipments):,}")
 
 a, b, c, d = st.columns(4)
-
-
 a.metric("Avg Distance", f"{metrics.avg_distance:,.0f} km")
-
 b.metric("Avg Delivery", f"{metrics.avg_delivery:.1f} hrs")
-
 c.metric("Avg Package Weight", f"{metrics.avg_weight:.1f} kg")
-
-d.metric("Risk Score", f"{metrics.avg_risk:.0f}")
-
+d.metric("Avg Risk Score", f"{metrics.avg_risk:.1f}")
 
 st.divider()
 
-
-# -------------------------
-# STATUS + PRIORITY
-# -------------------------
-
 left, right = st.columns(2)
 
-
 status = shipment_status(filters)
-
-
 fig = px.pie(status, names="status", values="shipments", title="Shipment Status")
-
-
 left.plotly_chart(fig, use_container_width=True)
 
-
 priority = priority_distribution(filters)
-
-
 fig = px.bar(
     priority,
     x="priority",
@@ -94,92 +62,56 @@ fig = px.bar(
     color="priority",
     title="Priority Distribution",
 )
-
-
 right.plotly_chart(fig, use_container_width=True)
 
-
 st.divider()
-
-
-# -------------------------
-# SHIPMENT TREND
-# -------------------------
 
 st.subheader("📈 Shipment Activity")
 
-
 timeline = shipment_timeline(filters)
-
-
 fig = px.line(timeline, x="date", y="shipments", markers=True)
-
-
+fig.update_traces(line=dict(width=2))
+fig.update_layout(hovermode="x unified")
 st.plotly_chart(fig, use_container_width=True)
-
-
-# -------------------------
-# PACKAGE + WAREHOUSE
-# -------------------------
-
-left, right = st.columns(2)
-
-
-sizes = run_query(
-    """
-SELECT
-
-    package_size,
-
-    COUNT(*) shipments
-
-FROM delivery_performance
-
-GROUP BY package_size
-
-ORDER BY shipments DESC
-
-"""
-)
-
-
-fig = px.bar(sizes, x="package_size", y="shipments", title="Package Size Distribution")
-
-
-left.plotly_chart(fig, use_container_width=True)
-
-
-warehouse = warehouse_performance(filters)
-
-
-fig = px.bar(
-    warehouse, x="name", y="shipments", title="Warehouse Volume", color="shipments"
-)
-
-
-right.plotly_chart(fig, use_container_width=True)
-
 
 st.divider()
 
+left, right = st.columns(2)
 
-# -------------------------
-# RISK SUMMARY
-# -------------------------
+where = get_where(filters)
+
+sizes = run_query(f"""
+    SELECT package_size, COUNT(*) AS shipments
+    FROM delivery_performance
+    {where}
+    GROUP BY package_size
+    ORDER BY shipments DESC
+    """)
+fig = px.bar(sizes, x="package_size", y="shipments", title="Package Size Distribution")
+left.plotly_chart(fig, use_container_width=True)
+
+warehouse = warehouse_performance(filters)
+fig = px.bar(
+    warehouse,
+    x="name",
+    y="shipments",
+    title="Warehouse Volume",
+    color="shipments",
+)
+fig.update_layout(xaxis_tickangle=-30)
+right.plotly_chart(fig, use_container_width=True)
+
+st.divider()
 
 st.subheader("⚠️ Risk Overview")
 
-
 risk = risk_summary(filters)
-
-
 fig = px.bar(
     risk,
     x="risk_category",
     y="shipments",
     color="risk_category",
+    color_discrete_map=RISK_COLORS,
     title="Risk Distribution",
 )
-
-
 st.plotly_chart(fig, use_container_width=True)

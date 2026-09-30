@@ -2,7 +2,7 @@ from pathlib import Path
 
 import polars as pl
 
-from src.config.settings import SILVER_DIR
+from src.config.settings import SILVER_DIR, DEFAULT_WAREHOUSE_COUNT
 from src.utils.logger import logger
 
 
@@ -46,28 +46,18 @@ class WarehouseGenerator:
         },
     ]
 
-    def generate(self) -> pl.DataFrame:
-        """
-        Generate warehouse dataframe.
-        """
+    def generate(self, count: int = DEFAULT_WAREHOUSE_COUNT) -> pl.DataFrame:
+        if count > len(self.WAREHOUSES):
+            raise ValueError(f"Only {len(self.WAREHOUSES)} warehouses defined")
 
-        warehouses = []
-
-        for index, warehouse in enumerate(
-            self.WAREHOUSES,
-            start=1,
-        ):
-            warehouses.append(
-                {
-                    "warehouse_id": f"WH-{index:03d}",
-                    **warehouse,
-                }
-            )
+        selected = self.WAREHOUSES[:count]
+        warehouses = [
+            {"warehouse_id": f"WH-{i:03d}", **wh}
+            for i, wh in enumerate(selected, start=1)
+        ]
 
         df = pl.DataFrame(warehouses)
-
         logger.info(f"Generated {df.height} warehouses")
-
         return df
 
     def save(self, df: pl.DataFrame) -> Path:

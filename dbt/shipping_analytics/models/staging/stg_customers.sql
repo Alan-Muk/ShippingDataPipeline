@@ -5,6 +5,7 @@ select
     email,
     city,
     state,
-    country
-
+    country,
+    latitude,
+    longitude
 from {{ source('shipping', 'customers') }}

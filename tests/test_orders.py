@@ -1,174 +1,109 @@
+"""
+Tests for OrderGenerator.
+"""
+
 import polars as pl
 
 from src.extract.orders import OrderGenerator
 
-
-def create_test_customers():
-    """
-    Create a small fake customer dataframe.
-    """
-
-    return pl.DataFrame(
-        {
-            "customer_id": [
-                "cust-001",
-                "cust-002",
-            ],
-            "first_name": [
-                "John",
-                "Jane",
-            ],
-        }
-    )
+# ---------------------------------------------------------------------
+# Row count
+# ---------------------------------------------------------------------
 
 
-def test_order_generation_creates_correct_amount():
-    customers = create_test_customers()
-
-    generator = OrderGenerator()
-
-    warehouses = create_test_warehouses()
-
-    orders = generator.generate(
-        customers,
-        warehouses,
+def test_generation_returns_dataframe(sample_customers, sample_warehouses):
+    orders = OrderGenerator().generate(
+        sample_customers,
+        sample_warehouses,
         orders_per_customer=3,
     )
 
     assert isinstance(orders, pl.DataFrame)
-
-    # 2 customers * 3 orders each
-    assert orders.height == 6
+    assert orders.height == sample_customers.height * 3
 
 
-def test_orders_have_required_columns():
-    customers = create_test_customers()
+def test_orders_per_customer_is_respected(sample_customers, sample_warehouses):
+    for n in (1, 4, 10):
+        orders = OrderGenerator().generate(
+            sample_customers,
+            sample_warehouses,
+            orders_per_customer=n,
+        )
+        assert orders.height == sample_customers.height * n
 
-    generator = OrderGenerator()
 
-    warehouses = create_test_warehouses()
+# ---------------------------------------------------------------------
+# Schema
+# ---------------------------------------------------------------------
 
-    orders = generator.generate(
-        customers,
-        warehouses,
-        orders_per_customer=3,
-    )
 
-    expected_columns = {
+def test_orders_have_required_columns(sample_customers, sample_warehouses):
+    orders = OrderGenerator().generate(sample_customers, sample_warehouses, 3)
+
+    assert {
         "order_id",
         "customer_id",
+        "warehouse_id",
         "package_weight_kg",
         "package_size",
         "priority",
         "status",
         "created_at",
-    }
-
-    assert expected_columns.issubset(set(orders.columns))
+    } <= set(orders.columns)
 
 
-def test_orders_reference_existing_customers():
-    customers = create_test_customers()
+def test_order_ids_are_unique(sample_customers, sample_warehouses):
+    orders = OrderGenerator().generate(sample_customers, sample_warehouses, 5)
 
-    generator = OrderGenerator()
-
-    warehouses = create_test_warehouses()
-
-    orders = generator.generate(
-        customers,
-        warehouses,
-        orders_per_customer=3,
-    )
-
-    order_customer_ids = set(orders["customer_id"])
-
-    customer_ids = set(customers["customer_id"])
-
-    assert order_customer_ids.issubset(customer_ids)
+    assert orders["order_id"].n_unique() == orders.height
 
 
-def test_order_values_are_valid():
-    customers = create_test_customers()
+# ---------------------------------------------------------------------
+# Referential integrity
+# ---------------------------------------------------------------------
 
-    generator = OrderGenerator()
 
-    warehouses = create_test_warehouses()
+def test_orders_reference_existing_customers(sample_customers, sample_warehouses):
+    orders = OrderGenerator().generate(sample_customers, sample_warehouses, 3)
 
-    orders = generator.generate(
-        customers,
-        warehouses,
-        orders_per_customer=3,
-    )
+    assert set(orders["customer_id"]) <= set(sample_customers["customer_id"])
 
-    assert orders["package_weight_kg"].min() > 0
 
-    assert (
-        orders["priority"]
-        .is_in(
-            [
-                "standard",
-                "express",
-                "priority",
-            ]
-        )
-        .all()
-    )
+def test_orders_reference_existing_warehouses(sample_customers, sample_warehouses):
+    orders = OrderGenerator().generate(sample_customers, sample_warehouses, 5)
+
+    assert set(orders["warehouse_id"]) <= set(sample_warehouses["warehouse_id"])
+
+
+# ---------------------------------------------------------------------
+# Value validation
+# ---------------------------------------------------------------------
+
+
+def test_package_weights_are_positive_and_bounded(sample_customers, sample_warehouses):
+    orders = OrderGenerator().generate(sample_customers, sample_warehouses, 5)
+
+    assert (orders["package_weight_kg"] > 0).all()
+    assert (orders["package_weight_kg"] <= 30).all()
+
+
+def test_priorities_are_from_known_set(sample_customers, sample_warehouses):
+    orders = OrderGenerator().generate(sample_customers, sample_warehouses, 5)
+
+    assert orders["priority"].is_in(["standard", "express", "priority"]).all()
+
+
+def test_statuses_are_from_known_set(sample_customers, sample_warehouses):
+    orders = OrderGenerator().generate(sample_customers, sample_warehouses, 5)
 
     assert (
         orders["status"]
-        .is_in(
-            [
-                "created",
-                "processing",
-                "shipped",
-                "delivered",
-                "cancelled",
-            ]
-        )
+        .is_in(["created", "processing", "shipped", "delivered", "cancelled"])
         .all()
     )
 
 
-def create_test_warehouses():
-    return pl.DataFrame(
-        {
-            "warehouse_id": [
-                "WH-001",
-                "WH-002",
-            ]
-        }
-    )
+def test_package_sizes_are_from_known_set(sample_customers, sample_warehouses):
+    orders = OrderGenerator().generate(sample_customers, sample_warehouses, 5)
 
-
-def test_orders_reference_existing_warehouses():
-    customers = create_test_customers()
-    warehouses = create_test_warehouses()
-
-    generator = OrderGenerator()
-
-    orders = generator.generate(
-        customers,
-        warehouses,
-        orders_per_customer=5,
-    )
-
-    order_warehouse_ids = set(orders["warehouse_id"])
-
-    warehouse_ids = set(warehouses["warehouse_id"])
-
-    assert order_warehouse_ids.issubset(warehouse_ids)
-
-
-def test_orders_have_warehouse_id():
-    customers = create_test_customers()
-    warehouses = create_test_warehouses()
-
-    generator = OrderGenerator()
-
-    orders = generator.generate(
-        customers,
-        warehouses,
-        orders_per_customer=2,
-    )
-
-    assert "warehouse_id" in orders.columns
+    assert orders["package_size"].is_in(["small", "medium", "large"]).all()

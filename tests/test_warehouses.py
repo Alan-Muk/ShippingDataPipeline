@@ -40,3 +40,16 @@ def test_warehouse_ids_are_unique():
     warehouses = generator.generate()
 
     assert warehouses["warehouse_id"].n_unique() == warehouses.height
+
+
+def test_generate_respects_count_argument():
+    subset = WarehouseGenerator().generate(count=2)
+    assert subset.height == 2
+    assert set(subset["warehouse_id"]) == {"WH-001", "WH-002"}
+
+
+def test_generate_rejects_excessive_count():
+    import pytest
+
+    with pytest.raises(ValueError, match="warehouses defined"):
+        WarehouseGenerator().generate(count=999)
