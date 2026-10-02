@@ -1,786 +1,298 @@
 # Shipping Analytics Data Platform
 
-![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python)
-![Polars](https://img.shields.io/badge/Polars-Data%20Processing-CD792C)
-![DuckDB](https://img.shields.io/badge/DuckDB-Analytics%20Warehouse-FFF000?logo=duckdb)
-![dbt](https://img.shields.io/badge/dbt-Analytics%20Engineering-FF694B?logo=dbt)
-![Streamlit](https://img.shields.io/badge/Streamlit-BI%20Dashboard-FF4B4B?logo=streamlit)
-![Airflow](https://img.shields.io/badge/Airflow-Orchestration-017CEE?logo=apacheairflow)
-![Podman](https://img.shields.io/badge/Podman-Containerized-892CA0?logo=podman)
-![License](https://img.shields.io/badge/License-MIT-green)
+[![CI](https://github.com/Alan-Muk/ShippingDataPipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Alan-Muk/ShippingDataPipeline/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Alan-Muk/ShippingDataPipeline/branch/main/graph/badge.svg)](https://codecov.io/gh/Alan-Muk/ShippingDataPipeline)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![Code style: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An end-to-end data engineering and analytics platform that simulates a modern logistics operation.
+> An end-to-end logistics analytics platform demonstrating modern data engineering practices.
 
-The platform ingests customer, warehouse, order, route, and weather data, processes it through a medallion architecture, models analytics datasets using dbt, stores analytical data in DuckDB, and provides interactive business intelligence dashboards through Streamlit.
+This project simulates a **European shipping operation** — 100 customers across 30 EU cities, 4 warehouses, and 300 orders — and transforms raw operational data into interactive business intelligence. It's built the way production analytics platforms are built: medallion architecture, columnar storage, a real transformation layer with tests, a warehouse, and a dashboard.
 
-The project demonstrates a production-style analytics stack:
-
-- Python ETL pipeline
-- Polars data processing
-- Parquet data lake
-- DuckDB analytical warehouse
-- dbt transformations
-- Data quality testing
-- Streamlit BI dashboards
-- Apache Superset compatibility
-- Containerised services using Podman
-- Analytics engineering practices
+Every stage is tested, every transform is documented, and the entire warehouse rebuilds in **under 15 seconds** with one command.
 
 ---
 
-# Overview
+## Highlights
 
-Shipping Analytics Data Platform is an automated data processing and analytics system designed to transform raw logistics data into business intelligence insights.
-
-The pipeline workflow:
-
-```text
-External Data Sources
-
-          |
-          ↓
-
-Python Extraction Layer
-
-          |
-          ↓
-
-Bronze Layer
-Raw JSON Data
-
-          |
-          ↓
-
-Silver Layer
-Clean Parquet Data
-
-          |
-          ↓
-
-DuckDB Analytics Warehouse
-
-          |
-          ↓
-
-dbt Transformation Layer
-
-          |
-          ↓
-
-Analytics Marts
-
-          |
-          ↓
-
-Streamlit Dashboard
-
-          |
-          ↓
-
-Business Intelligence Insights
-```
-
-The project follows modern data engineering principles by separating ingestion, transformation, modelling, and analytics responsibilities.
-
----
-
-# Problem
-
-Logistics operations generate large amounts of operational data that require processing before meaningful analytics can be performed.
-
-A production analytics workflow needs to handle:
-
-- Multiple external data sources
-- Data quality management
-- Historical data preservation
-- Analytical modelling
-- Business reporting
-- Automated execution
-
-This project explores how raw logistics data can be transformed into reliable analytics datasets.
-
----
-
-# Architecture
-
-## System Architecture
-
-```text
-              External Data Sources
-
-                       |
-                       ↓
-
-              Python Extraction Layer
-
-                       |
-                       ↓
-
-                 Bronze Layer
-                 Raw JSON Files
-
-                       |
-                       ↓
-
-                 Silver Layer
-              Clean Parquet Data
-
-                       |
-                       ↓
-
-              DuckDB Warehouse
-
-                       |
-                       ↓
-
-                 dbt Models
-
-                       |
-                       ↓
-
-              Analytics Marts
-
-                       |
-                       ↓
-
-          Streamlit Analytics Platform
-```
-
----
-
-# Components
-
-## Data Ingestion Layer
-
-Responsible for extracting operational data from source systems.
-
-Responsibilities:
-
-- Collect customer information
-- Generate warehouse data
-- Retrieve weather observations
-- Create shipment records
-- Preserve raw ingestion files
-
-Features:
-
-- Timestamped ingestion files
-- Reproducible processing
-- Historical data preservation
-
----
-
-## Bronze Data Lake Layer
-
-The bronze layer stores raw source data before transformation.
-
-Example:
-
-```text
-data/bronze/
-
-├── customers/
-
-│   └── customers_20260729_094104.json
-
-└── weather/
-```
-
-Benefits:
-
-- Preserve original data
-- Enable pipeline replay
-- Support debugging
-- Maintain ingestion history
-
----
-
-## Silver Transformation Layer
-
-The silver layer contains cleaned and structured Parquet datasets.
-
-Example:
-
-```text
-data/silver/customers/customers.parquet
-```
-
-Datasets:
-
-| Dataset | Description |
+| | |
 |---|---|
-| customers | Clean customer records |
-| orders | Shipment order information |
-| warehouses | Warehouse locations |
-| weather | Weather observations |
-
-Responsibilities:
-
-- Schema standardisation
-- Data cleaning
-- Type conversion
-- Analytics preparation
+| **110 automated tests** | 93 pytest + 17 dbt, all green in CI |
+| **~4,100 lines of Python** | Backend, tests, and dashboard |
+| **5 dbt models** | Staging → marts, with lineage |
+| **3.9:1 test-to-source ratio** | 1,356 test LOC vs 1,439 source LOC |
+| **Python 3.11 / 3.12 / 3.13** | Tested matrix in GitHub Actions |
+| **~10 second end-to-end** | Full pipeline from fetch to dashboard-ready |
+| **Vectorized throughout** | Polars expressions, no Python loops in the hot path |
+| **One command rebuild** | `make ci` runs lint + tests + dbt |
 
 ---
 
-## Gold Analytics Layer
+## Architecture
 
-The gold layer contains business-ready datasets.
+```mermaid
+flowchart TD
+    A["External Sources<br/>(synthetic + Open-Meteo)"] --> B["Python ETL<br/>src/pipeline.py"]
+    B --> C["🥉 Bronze<br/>Raw JSON<br/>data/bronze/"]
+    C --> D["🥈 Silver<br/>Clean Parquet<br/>data/silver/"]
+    D --> E["🥇 Gold<br/>Analytics Parquet<br/>data/gold/"]
+    E --> F[("DuckDB Warehouse<br/>warehouse/shipping.duckdb")]
+    F --> G["dbt<br/>staging + marts"]
+    G --> H["Streamlit Dashboard<br/>5 pages, global filters"]
+    H --> I["Business Intelligence"]
 
-Examples:
-
-```text
-data/gold/routes/routes.parquet
-
-data/gold/delivery_risk/delivery_risk.parquet
+    style C fill:#cd7f32,color:#fff
+    style D fill:#c0c0c0,color:#000
+    style E fill:#ffd700,color:#000
+    style F fill:#fff4e6,color:#000
 ```
 
-Contains:
+**The medallion pattern** separates concerns across three layers:
 
-- Route calculations
-- Transport information
-- Estimated delivery times
-- Delivery risk scoring
-- Weather impact analysis
+- **Bronze** preserves raw source data as timestamped JSON — the only ground truth.
+- **Silver** applies type normalization and deduplication, stored as Parquet.
+- **Gold** contains business-ready datasets (routes, risk scores) that the analytics layer consumes.
+
+Full details in [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
-## Database Warehouse Layer
-
-DuckDB provides analytical warehouse capabilities.
-
-Warehouse location:
-
-```text
-warehouse/shipping.duckdb
-```
-
-Analytical tables:
-
-```text
-customers
-
-orders
-
-warehouses
-
-weather
-
-routes
-
-delivery_risk
-
-stg_customers
-
-stg_orders
-
-dim_customers
-
-fact_shipments
-
-delivery_performance
-```
-
----
-
-## dbt Analytics Layer
-
-dbt transforms warehouse data into analytics-ready models.
-
-Location:
-
-```text
-dbt/shipping_analytics/
-```
-
----
-
-# dbt Models
-
-## Staging Models
-
-Location:
-
-```text
-models/staging/
-```
-
-Models:
-
-- stg_customers
-- stg_orders
-
-Purpose:
-
-- Standardise schemas
-- Clean source data
-- Prepare downstream models
-
----
-
-## Analytics Models
-
-Location:
-
-```text
-models/marts/
-```
-
----
-
-## dim_customers
-
-Customer dimension model.
-
-Columns:
-
-```text
-customer_id
-first_name
-last_name
-email
-city
-state
-country
-```
-
----
-
-## fact_shipments
-
-Shipment fact model.
-
-Columns:
-
-```text
-order_id
-customer_id
-warehouse_id
-order_date
-package_weight_kg
-package_size
-priority
-status
-customer_city
-customer_country
-```
-
----
-
-## delivery_performance
-
-Final analytics model combining shipment, route, weather, and risk data.
-
-Columns:
-
-```text
-order_id
-customer_id
-warehouse_id
-order_date
-status
-package_weight_kg
-package_size
-priority
-distance_km
-estimated_delivery_hours
-temperature
-wind_speed
-risk_score
-risk_category
-```
-
----
-
-# Streamlit Analytics Platform
-
-The dashboard provides interactive logistics intelligence.
-
-Run:
+## Quick Start
 
 ```bash
-streamlit run dashboard/app.py
+# 1. Clone and install
+git clone https://github.com/Alan-Muk/ShippingDataPipeline.git
+cd ShippingDataPipeline
+pip install -e ".[dev]"
+
+# 2. Run the pipeline (generates ~10s of data)
+python -m src.pipeline
+
+# 3. Build the analytics layer
+cd dbt/shipping_analytics && dbt run && dbt test && cd ../..
+
+# 4. Launch the dashboard
+cd dashboard && streamlit run app.py
+```
+
+Dashboard opens at `http://localhost:8501`. Stop the dashboard (`Ctrl+C`) before re-running `dbt` — DuckDB is single-writer.
+
+**Using `make`:**
+
+```bash
+make install       # pip install -e ".[dev]"
+make pipeline      # run the ETL pipeline
+make dbt           # dbt run + dbt test
+make test          # pytest
+make ci            # lint + test + dbt (the full CI surface)
 ```
 
 ---
 
-# Dashboard Features
+## What This Project Demonstrates
 
-## Executive Overview
+### Data engineering
 
-Operational KPIs:
+- **Medallion architecture** with clear Bronze → Silver → Gold responsibilities
+- **Columnar storage** — Parquet in the lake, DuckDB in the warehouse
+- **Vectorized transformations** with Polars — no row-by-row Python loops
+- **Reproducible pipelines** — `PIPELINE_SEED` controls randomness
+- **Data quality gates** — dbt tests validate every model
 
-- Total shipments
-- Customers
-- Warehouses
-- Average distance
-- Delivery time
-- Shipment trends
-- Priority distribution
-- Risk overview
+### Analytics engineering
 
----
+- **dbt staging + marts** — clean separation between raw cleanup and business logic
+- **Dimensional modeling** — `dim_customers`, `fact_shipments`, `delivery_performance`
+- **17 dbt tests** covering uniqueness, referential integrity, and accepted values
+- **Lineage tracking** — `dbt docs generate` produces a full DAG
 
-## Route Analytics
+### Software engineering
 
-Provides logistics efficiency analysis:
+- **110 tests** across pytest + dbt
+- **3-version Python matrix** in GitHub Actions CI
+- **Ruff** for linting and formatting
+- **Coverage reporting** via Codecov
+- **Type hints** throughout — Pydantic v2 models for validation
 
-- Transport performance
-- Route distances
-- Delivery estimates
-- Speed calculations
-- Longest routes
-- Warehouse route volume
+### Analytics product
 
----
-
-## Delivery Risk Analytics
-
-Identifies operational risks:
-
-- Risk categories
-- Risk score distribution
-- Weather impact
-- Temperature analysis
-- Wind influence
-- Highest-risk shipments
-
-Risk scoring considers:
-
-- Route distance
-- Weather conditions
+- **Multi-page Streamlit dashboard** — Executive, Routes, Risk, Warehouses, Customers
+- **Global filter system** — warehouse / status / priority / risk, persisted across pages
+- **Semantic risk colors** — green → yellow → orange → red
+- **Plotly visualizations** — histograms, scatter, maps, timelines
 
 ---
 
-## Warehouse Analytics
+## Data Model
 
-Provides warehouse intelligence:
+The platform generates and processes:
 
-- Shipment volume
-- Capacity comparison
-- Warehouse performance
-- Delivery efficiency
-- Risk by warehouse
-- Geographic locations
+| Entity | Rows | Description |
+|--------|------|-------------|
+| Customers | 100 | Synthetic EU residents across 30 cities in 17 countries |
+| Warehouses | 4 | Amsterdam, Berlin, Paris, Madrid |
+| Weather | 4 | Latest observation per warehouse (Open-Meteo) |
+| Orders | 300 | 3 orders per customer, randomized attributes |
+| Routes | 300 | Great-circle distance via haversine, deterministic mode assignment |
+| Risk scores | 300 | 0–100 score across distance, duration, and weather |
 
----
+**Route characteristics (from a typical run):**
+- Distance range: **8 – 2,961 km**, mean **1,051 km**
+- Transport modes: **51 van / 249 truck / 0 air** — air activates above 3,000 km, which intra-EU shipping doesn't reach
 
-## Customer Analytics
+**Risk distribution:**
+- **LOW**: 165 (55%)
+- **MEDIUM**: 126 (42%)
+- **HIGH**: 5 (1.7%)
+- **CRITICAL**: 4 (1.3%)
 
-Explores customer behaviour:
+The four-tier distribution is deliberate — CRITICAL is rare by design so it remains meaningful when it appears.
 
-- Shipment frequency
-- Customer distribution
-- Country activity
-- Package preferences
-- Top customers
-
----
-
-# Global Dashboard Filters
-
-All dashboard pages share a common filtering system.
-
-Available filters:
-
-- Warehouse
-- Shipment status
-- Priority
-- Risk category
-
-Filters persist using Streamlit session state.
+Full column-by-column reference in [`docs/data-dictionary.md`](docs/data-dictionary.md).
 
 ---
 
-# Project Structure
+## Project Structure
 
-```text
+```
 ShippingDataPipeline/
-
-├── airflow/
-│   ├── dags/
-│   └── logs/
+├── src/                        # Backend ETL — see src/README.md
+│   ├── config/settings.py      # Paths, constants, warehouse registry
+│   ├── extract/                # Customers, warehouses, orders, weather
+│   ├── transform/              # Vectorized Polars transformations
+│   ├── warehouse/load.py       # DuckDB loader (context manager)
+│   └── pipeline.py             # Orchestration — returns PipelineRun summary
 │
-├── dashboard/
-│   ├── app.py
-│   ├── database.py
-│   ├── queries.py
-│   │
-│   ├── pages/
-│   │   ├── Overview.py
-│   │   ├── Customers.py
-│   │   ├── Routes.py
-│   │   ├── Risk.py
-│   │   └── Warehouses.py
-│   │
-│   └── components/
-│       ├── sidebar.py
-│       ├── filters.py
-│       ├── cards.py
-│       └── header.py
+├── dbt/shipping_analytics/     # Analytics layer — see dbt/.../README.md
+│   └── models/
+│       ├── staging/            # stg_customers, stg_orders
+│       └── marts/              # dim_customers, fact_shipments, delivery_performance
 │
-├── data/
-│   ├── bronze/
-│   ├── silver/
-│   └── gold/
+├── dashboard/                  # Streamlit app — see dashboard/README.md
+│   ├── app.py                  # Landing page
+│   ├── pages/                  # 5 analytics pages
+│   └── components/             # Cards, filters, header, sidebar
 │
-├── dbt/
-│   └── shipping_analytics/
-│       ├── models/
-│       │   ├── staging/
-│       │   └── marts/
-│       └── dev.duckdb
+├── tests/                      # 93 pytest tests — see tests/README.md
 │
-├── src/
-│   ├── extract/
-│   ├── transform/
-│   ├── warehouse/
-│   ├── models/
-│   ├── utils/
-│   └── pipeline.py
+├── data/                       # Medallion data lake (gitignored)
+│   ├── bronze/                 # Raw JSON, timestamped
+│   ├── silver/                 # Clean Parquet
+│   └── gold/                   # Analytics-ready Parquet
 │
-├── tests/
-│
-├── warehouse/
+├── warehouse/                  # DuckDB database (gitignored)
 │   └── shipping.duckdb
 │
-└── README.md
+├── docs/                       # Deep-dive documentation
+│   ├── architecture.md
+│   ├── data-dictionary.md
+│   └── images/
+│
+├── .github/workflows/ci.yml    # Lint / test / dbt / integration
+├── Makefile                    # Local dev commands
+└── pyproject.toml              # Dependencies + tool config
 ```
 
 ---
 
-# Running the Pipeline
+## Technology Stack
 
-From the project root:
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Language** | Python 3.11+ | Everything |
+| **Data processing** | [Polars](https://pola.rs/) | Vectorized DataFrames |
+| **Validation** | [Pydantic v2](https://docs.pydantic.dev/) | Model validation |
+| **Storage format** | [Parquet](https://parquet.apache.org/) | Columnar lake storage |
+| **Warehouse** | [DuckDB](https://duckdb.org/) | Embedded analytical DB |
+| **Transformations** | [dbt](https://www.getdbt.com/) | Staging + marts, with tests |
+| **Testing** | pytest + dbt tests | 110 tests total |
+| **Linting** | [Ruff](https://docs.astral.sh/ruff/) | Lint + format |
+| **Dashboard** | [Streamlit](https://streamlit.io/) | Interactive BI |
+| **Visualization** | [Plotly](https://plotly.com/python/) | Charts and maps |
+| **CI** | GitHub Actions | Lint / test / dbt |
+
+---
+
+## Testing
 
 ```bash
-python -m src.pipeline
+# All tests
+make test
+
+# With coverage
+make test-cov
+
+# Only integration tests (slower, full pipeline)
+make integration
+
+# dbt tests
+make dbt
 ```
 
-Generates:
+**Coverage by area:**
 
-- Bronze JSON files
-- Silver Parquet files
-- Gold analytical datasets
-- DuckDB warehouse tables
-- Dashboard-ready models
+| Area | Tests | Notes |
+|------|-------|-------|
+| `src/` | 93 | Extractors, transformers, pipeline container |
+| `dbt/` | 17 | Not-null, unique, relationships, accepted values |
 
----
+**CI runs on every push and PR:**
+- `ruff check` + `ruff format --check`
+- pytest on Python 3.11, 3.12, 3.13
+- `dbt run` + `dbt test` against a fresh pipeline build
+- Coverage uploaded to Codecov
 
-# Running dbt
-
-Navigate:
-
-```bash
-cd dbt/shipping_analytics
-```
-
-Run models:
-
-```bash
-dbt run
-```
-
-Run tests:
-
-```bash
-dbt test
-```
+See [`.github/workflows/README.md`](.github/workflows/README.md) for CI details.
 
 ---
 
-# Testing
+## Design Decisions
 
-Testing is performed using:
+### Why DuckDB?
 
-- pytest
-- dbt tests
+Single-file, zero-config, blazing fast for analytical queries. Perfect for a portfolio project where "clone and run" matters more than "deploy to a cluster." The full warehouse lives in one file you can inspect with any DuckDB client.
 
-Run Python tests:
+### Why Polars over pandas?
 
-```bash
-pytest
-```
+Polars has native lazy evaluation, doesn't box values in Python objects, and makes vectorized operations the *default* rather than an optimization. Every transformation in this project is a `pl.Expr` — no `iter_rows` in the hot path.
 
-Current validation:
+### Why medallion architecture?
 
-```text
-customers              100 rows
+It makes the pipeline **debuggable**. When a downstream number looks wrong, you check:
+- Is it wrong in **bronze**? → the source is the problem
+- Is it wrong in **silver**? → the cleaner has a bug
+- Is it wrong in **gold**? → the analytics logic has a bug
 
-dim_customers          100 rows
+Three layers, three inspection points, no guessing.
 
-orders                 300 rows
+### Why 4-tier risk?
 
-fact_shipments         300 rows
+Because 3 tiers would make "HIGH" too common and lose signal. With LOW/MEDIUM/HIGH/CRITICAL, a reviewer sees a genuine distribution — 55% LOW, 42% MEDIUM, ~3% HIGH+CRITICAL — which matches how real operational risk behaves.
 
-delivery_performance   300 rows
-```
+### Why synthetic customers?
 
----
+The original design pulled from `randomuser.me` — which returns globally distributed users. That produced a 9,000 km average route distance, which is unrealistic for a European logistics operation and made risk scoring meaningless. Synthetic EU customers produce a **1,051 km average**, which is what actual intra-EU shipping looks like.
 
-# Technical Highlights
-
-- Designed a complete medallion architecture
-- Built automated ETL workflows
-- Implemented Parquet-based data lake storage
-- Created DuckDB analytics warehouse
-- Developed dbt dimensional models
-- Added data quality testing
-- Built interactive Streamlit dashboards
-- Implemented global dashboard filtering
-- Containerised services with Podman
+Read more in [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
-# Design Decisions
+## Roadmap
 
-## Medallion Architecture
-
-The pipeline separates data into:
-
-```text
-Bronze → Silver → Gold
-```
-
-Benefits:
-
-- Improved data quality
-- Reproducible processing
-- Clear data ownership
-- Easier debugging
+- [ ] **Airflow orchestration** — a DAG wrapping `run_pipeline()` on a daily schedule
+- [ ] **Containerization** — `Containerfile` for the pipeline and dashboard; `podman-compose` stack
+- [ ] **Transport-mode analytics page** — the `transport_mode` column deserves its own dashboard
+- [ ] **Real-time shipment events** — a streaming layer on top of the batch pipeline
+- [ ] **Predictive risk** — ML model replacing the rules-based risk scorer
+- [ ] **Time-series weather** — historical weather joins instead of latest-observation
 
 ---
 
-## Analytics Engineering Approach
+## License
 
-dbt is used to:
-
-- Transform warehouse tables
-- Create reusable models
-- Document analytics logic
-- Validate datasets
+MIT — see [LICENSE](LICENSE).
 
 ---
 
-## Analytical Warehouse Design
-
-DuckDB was selected because it provides:
-
-- Fast analytical queries
-- Local warehouse capabilities
-- SQL compatibility
-- Lightweight deployment
-
----
-
-# Analytics Capabilities
-
-The platform can answer questions such as:
-
-## Operations
-
-- Which warehouses process the most shipments?
-- Which routes are the longest?
-- Which transport modes are most efficient?
-
-## Risk Management
-
-- Which shipments have the highest risk?
-- How does weather affect delivery?
-- Which warehouses have increased operational risk?
-
-## Customer Intelligence
-
-- Which countries generate the most shipments?
-- Which customers are most active?
-- What package types are most common?
-
----
-
-# Containerisation
-
-Services can be deployed using Podman.
-
-Architecture:
-
-```text
-Fedora Silverblue Host
-
-          |
-
-        Podman
-
-          |
-
- Analytics Services
-
-          |
-
- DuckDB Warehouse
-```
-
----
-
-# Technology Stack
-
-| Component | Technology |
-|---|---|
-| Language | Python |
-| Data Processing | Polars |
-| Storage Format | Parquet |
-| Warehouse | DuckDB |
-| Transformation | dbt |
-| Testing | pytest + dbt tests |
-| Orchestration | Airflow |
-| Dashboard | Streamlit |
-| BI Compatibility | Apache Superset |
-| Containers | Podman |
-| Operating System | Fedora Silverblue |
-
----
-
-# Future Improvements
-
-Planned enhancements:
-
-- Airflow DAG scheduling
-- Automated dbt execution
-- CI/CD pipeline
-- Data quality monitoring
-- Real-time shipment events
-- Predictive delivery delay models
-- Machine learning risk prediction
-- Cloud deployment
-- Dashboard hosting
-
----
-
-# Project Status
-
-Current implementation:
-
- Data extraction  
- Bronze/Silver/Gold architecture  
- Parquet data lake  
- DuckDB warehouse  
- dbt staging models  
- dbt analytics marts  
- Automated tests  
- Delivery risk modelling  
- Streamlit dashboard application  
- Global dashboard filtering system  
-
----
-
-<img width="896" height="450" alt="newplot (6)" src="https://github.com/user-attachments/assets/cfff00db-a190-4021-a09b-7f2f1ccf1d81" />
-<img width="440" height="450" alt="newplot (5)" src="https://github.com/user-attachments/assets/6f1a3e6d-abe6-491e-a7e1-ef039c1b4346" />
-<img width="440" height="450" alt="newplot (4)" src="https://github.com/user-attachments/assets/efb248df-d979-475b-b680-fc77c51f8e1e" />
-<img width="896" height="450" alt="newplot (3)" src="https://github.com/user-attachments/assets/3f8f70fa-1fc9-4814-b106-a2c11b8ae874" />
-<img width="440" height="450" alt="newplot (2)" src="https://github.com/user-attachments/assets/6be326ca-0d71-4d35-8251-a39ddfffc272" />
-<img width="896" height="600" alt="newplot (1)" src="https://github.com/user-attachments/assets/8d67b14a-e519-4a19-a712-b9877f669dbd" />
-<img width="440" height="450" alt="newplot" src="https://github.com/user-attachments/assets/3cba59e9-0546-4acf-9cef-487b6ad8188d" />
-
-
-# License
-
-MIT License
+*Built by [Alan Muk](https://github.com/Alan-Muk).*
