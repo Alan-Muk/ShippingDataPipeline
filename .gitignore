@@ -155,3 +155,9 @@ dbt/**/dbt_packages/
 # --- OS ---
 .DS_Store
 Thumbs.db
+
+# --- Airflow ---
+airflow/logs/
+airflow/plugins/__pycache__/
+airflow/.env
+airflow/airflow.cfg
